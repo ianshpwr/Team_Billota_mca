@@ -29,6 +29,7 @@ Output format is identical to the log written by testbench/cache_tb_vec.v.
 
 CLI: python3 -I verification/reference_model.py <vec> <out_log> <mem_dump> [latency]
 """
+import re
 import sys
 
 READ, WRITE, RESET, IDLE, END = 0x00, 0x01, 0x02, 0x03, 0xFF
@@ -99,15 +100,22 @@ class CacheModel:
 
 
 def load_vectors(path):
+    """Read hex words with file/line diagnostics before executing any requests."""
     words = []
-    for line in open(path):
-        line = line.strip()
-        if not line or line.startswith("//") or line.startswith("#"):
-            continue
-        w = int(line, 16)
-        if (w >> 24) == END:
-            break
-        words.append(w)
+    with open(path) as source:
+        for lineno, line in enumerate(source, 1):
+            line = line.split("//", 1)[0].split("#", 1)[0].strip()
+            if not line:
+                continue
+            if not re.fullmatch(r"[0-9a-fA-F]{8}", line):
+                raise ValueError("%s:%d: expected one 8-digit hex word" % (path, lineno))
+            w = int(line, 16)
+            op = w >> 24
+            if op == END:
+                break
+            if op not in (READ, WRITE, RESET, IDLE):
+                raise ValueError("%s:%d: unsupported opcode %02x" % (path, lineno, op))
+            words.append(w)
     return words
 
 
