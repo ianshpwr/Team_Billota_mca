@@ -17,6 +17,7 @@ test-python:
 
 # Developer/CI smoke run: keep fresh logs in build/, preserving saved evidence.
 smoke: test-python lint-rtl | $(BUILD)
+
 	iverilog $(IVFLAGS) -I testbench -s cache_tb_directed -o $(BUILD)/smoke_directed.vvp testbench/cache_tb_directed.v $(RTL)
 	vvp $(BUILD)/smoke_directed.vvp > $(BUILD)/smoke_directed.log 2>&1 || { cat $(BUILD)/smoke_directed.log; exit 1; }
 	@grep -q "RESULT: ALL TESTS PASSED" $(BUILD)/smoke_directed.log || { cat $(BUILD)/smoke_directed.log; exit 1; }
