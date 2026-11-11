@@ -140,9 +140,11 @@ def run(vec_path, out_path, dump_path, mem_latency=4):
     for i in range(16):
         d = m.data[i]
         out.append("C %d %d %03x %08x" % (i, int(m.valid[i]), m.tag[i], d[0] | d[1] << 8 | d[2] << 16 | d[3] << 24))
-    open(out_path, "w").write("\n".join(out) + "\n")
+    with open(out_path, "w") as output:
+        output.write("\n".join(out) + "\n")
     if dump_path:
-        open(dump_path, "w").write("\n".join("%02x" % b for b in m.mem) + "\n")
+        with open(dump_path, "w") as dump:
+            dump.write("\n".join("%02x" % b for b in m.mem) + "\n")
     return m
 
 

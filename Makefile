@@ -7,9 +7,13 @@ BUILD    := build
 IVFLAGS  := -g2001 -Wall
 LATENCIES:= 1 2 4 8
 
-.PHONY: all phase1 phase1-all phase2 phase2-reports report audit final lat-sweep lint-rtl mutation yosys trace clean
+.PHONY: all test-python phase1 phase1-all phase2 phase2-reports report audit final lat-sweep lint-rtl mutation yosys trace clean
 
 all: phase1
+
+# Fast verification of the independent Python tools; no HDL tools required.
+test-python:
+	python3 -I -m unittest discover -s verification/tests -v
 
 $(BUILD):
 	mkdir -p $(BUILD)
