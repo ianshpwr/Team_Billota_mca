@@ -19,7 +19,7 @@ Metrics
         MEASURED avg_latency_cycles; they agree because the formulas were verified
         on every transaction by the testbench monitor.
 """
-import sys
+import argparse
 
 FIELDS = ["workload", "seed", "mem_latency_L", "total_requests", "reads", "writes", "hits", "misses",
           "hit_ratio", "miss_ratio", "mem_read_txns", "mem_write_txns", "avg_latency_cycles",
@@ -28,10 +28,20 @@ FIELDS = ["workload", "seed", "mem_latency_L", "total_requests", "reads", "write
 
 def parse_log(lines):
     txns = []
-    for ln in lines:
+    for lineno, ln in enumerate(lines, 1):
         p = ln.split()
         if p and p[0] == "T":
-            txns.append(dict(op=int(p[2]), hit=int(p[5]), lat=int(p[7]), mrd=int(p[8]), mwr=int(p[9])))
+            try:
+                if len(p) != 10:
+                    raise ValueError("expected 10 columns")
+                txn = dict(op=int(p[2]), hit=int(p[5]), lat=int(p[7]), mrd=int(p[8]), mwr=int(p[9]))
+                if any(txn[key] not in (0, 1) for key in ("op", "hit", "mrd", "mwr")):
+                    raise ValueError("operation and flags must be 0 or 1")
+                if txn["lat"] < 1:
+                    raise ValueError("latency must be positive")
+            except ValueError as error:
+                raise ValueError("transaction log line %d: %s" % (lineno, error)) from error
+            txns.append(txn)
     return txns
 
 
@@ -61,8 +71,21 @@ def compute(txns, L, workload="", seed=""):
     }
 
 
-if __name__ == "__main__":
-    log, L = sys.argv[1], int(sys.argv[2]) if len(sys.argv) > 2 else 4
-    r = compute(parse_log(open(log)), L, log)
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("log", help="transaction log from cache_tb_vec")
+    parser.add_argument("latency", nargs="?", type=int, default=4)
+    args = parser.parse_args(argv)
+    try:
+        with open(args.log) as source:
+            r = compute(parse_log(source), args.latency, args.log)
+    except (OSError, ValueError) as error:
+        parser.error(str(error))
+    if r is None:
+        parser.error("log contains no transaction records")
     for k in FIELDS:
         print("%-22s %s" % (k, r[k]))
+
+
+if __name__ == "__main__":
+    main()
