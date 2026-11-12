@@ -11,6 +11,7 @@
 * `pdflatex` not installed - needed only in Phase 3; will be raised at that gate.
 
 ### Specification read
+
 Spec file read in full (932 lines). Phase 1 scope executed only; Phases 2 and 3 not started.
 
 ### Design decisions (see `docs/architecture.md` D1-D11)
