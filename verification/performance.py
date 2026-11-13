@@ -20,6 +20,7 @@ Metrics
         on every transaction by the testbench monitor.
 """
 import argparse
+import re
 
 FIELDS = ["workload", "seed", "mem_latency_L", "total_requests", "reads", "writes", "hits", "misses",
           "hit_ratio", "miss_ratio", "mem_read_txns", "mem_write_txns", "avg_latency_cycles",
@@ -34,6 +35,11 @@ def parse_log(lines):
             try:
                 if len(p) != 10:
                     raise ValueError("expected 10 columns")
+                if not p[1].isascii() or not p[1].isdigit():
+                    raise ValueError("transaction index must be a nonnegative integer")
+                for column, width, name in ((3, 4, "address"), (4, 2, "write data"), (6, 2, "read data")):
+                    if not re.fullmatch(r"[0-9a-fA-F]{1,%d}" % width, p[column]):
+                        raise ValueError("%s must be at most %d hexadecimal digits" % (name, width))
                 txn = dict(op=int(p[2]), hit=int(p[5]), lat=int(p[7]), mrd=int(p[8]), mwr=int(p[9]))
                 if any(txn[key] not in (0, 1) for key in ("op", "hit", "mrd", "mwr")):
                     raise ValueError("operation and flags must be 0 or 1")

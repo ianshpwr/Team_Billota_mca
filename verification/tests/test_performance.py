@@ -10,6 +10,16 @@ import performance
 
 
 class PerformanceTests(unittest.TestCase):
+    def test_invalid_transaction_metadata_is_rejected(self):
+        valid = "T 0 0 0000 00 0 5a 9 1 0".split()
+        for column, value in ((1, "-1"), (1, "bad"), (3, "10000"), (3, "zzzz"),
+                              (4, "100"), (4, "-1"), (6, "100"), (6, "zz")):
+            row = valid.copy()
+            row[column] = value
+            with self.subTest(column=column, value=value), self.assertRaisesRegex(ValueError, "line 2:"):
+                performance.parse_log(["header", " ".join(row)])
+
+
     def test_measured_metrics_for_all_four_request_classes(self):
         txns = performance.parse_log([
             "R 0", "T 1 0 0000 00 0 5a 9 1 0", "T 2 0 0000 00 1 5a 3 0 0",
