@@ -19,6 +19,11 @@ class PerformanceTests(unittest.TestCase):
             with self.subTest(column=column, value=value), self.assertRaisesRegex(ValueError, "line 2:"):
                 performance.parse_log(["header", " ".join(row)])
 
+    def test_memory_flags_must_match_operation_and_hit(self):
+        for row in ("T 0 0 0000 00 1 5a 3 1 0", "T 0 0 0000 00 0 5a 9 0 0",
+                    "T 0 0 0000 00 0 5a 9 1 1", "T 0 1 0000 ab 0 00 14 1 0"):
+            with self.subTest(row=row), self.assertRaisesRegex(ValueError, "memory flags"):
+                performance.parse_log([row])
 
     def test_measured_metrics_for_all_four_request_classes(self):
         txns = performance.parse_log([

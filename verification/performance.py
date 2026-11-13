@@ -45,6 +45,8 @@ def parse_log(lines):
                     raise ValueError("operation and flags must be 0 or 1")
                 if txn["lat"] < 1:
                     raise ValueError("latency must be positive")
+                if txn["mrd"] != 1 - txn["hit"] or txn["mwr"] != txn["op"]:
+                    raise ValueError("memory flags disagree with operation and hit status")
             except ValueError as error:
                 raise ValueError("transaction log line %d: %s" % (lineno, error)) from error
             txns.append(txn)
