@@ -229,6 +229,7 @@ Responsibilities:
 -   Integrate the controller, cache, and main memory.
 -   Expose the CPU-facing interface.
 -   Connect all handshake and data signals.
+
 -   Expose useful debug signals for the testbench and waveform.
 
 ## 1.4 FSM design
