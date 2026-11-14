@@ -37,6 +37,19 @@ class RegressionOptionsTests(unittest.TestCase):
 
 
 class SimulatorFailureTests(unittest.TestCase):
+    def test_previous_outputs_cannot_make_a_new_run_pass(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vec = Path(tmp) / "input.vec"
+            vec.write_text("00000400\nff000000\n")
+            regression.ref.run(str(vec), str(Path(tmp) / "case.actual"), str(Path(tmp) / "case.mem"), 4)
+            result = subprocess.CompletedProcess([], 0, "RESULT: ALL TESTS PASSED", "")
+            with patch.object(regression, "BUILD", tmp), patch.object(regression.subprocess, "run", return_value=result):
+                problems, actual, count, digest = regression.run_case("dut", str(vec), "case", 4, False)
+            self.assertTrue(problems, "old simulator artifacts must not count as new output")
+            self.assertIn("did not produce output", problems[0])
+            self.assertFalse((Path(tmp) / "case.actual").exists())
+            self.assertFalse((Path(tmp) / "case.mem").exists())
+
     def test_failures_preserve_evidence_without_missing_output_crash(self):
         cases = [
             (subprocess.CompletedProcess([], 7, "", "simulator failed"), "exited with code 7"),

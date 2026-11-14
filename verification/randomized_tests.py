@@ -164,6 +164,9 @@ def run_case(exe, vecfile, tag, lat, varlat, timeout=120):
     expm = os.path.join(BUILD, tag + ".expmem")
     ref.run(vecfile, exp, expm, lat)
     simlog = Path(BUILD) / (tag + ".sim.log")
+    # A successful process must produce fresh DUT evidence for this invocation.
+    for artifact in (out, mem):
+        Path(artifact).unlink(missing_ok=True)
     try:
         sim = subprocess.run(["vvp", exe, "+vec=" + vecfile, "+out=" + out, "+memdump=" + mem],
                              cwd=ROOT, capture_output=True, text=True, timeout=timeout)
