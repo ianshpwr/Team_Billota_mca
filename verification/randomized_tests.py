@@ -16,7 +16,8 @@ Usage (repo root):
   python3 -I verification/randomized_tests.py --quick          # small smoke subset
   python3 -I verification/randomized_tests.py --gen-static     # (re)write static vectors only
 """
-import argparse, concurrent.futures as cf, csv, hashlib, os, random, shutil, subprocess, sys, time
+import argparse, concurrent.futures as cf, csv, hashlib, math, os, random, shutil, subprocess, sys, time
+from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import reference_model as ref
@@ -152,16 +153,31 @@ def compile_tb(lat, varlat=False):
 
 
 def read_lines(p):
-    return [l.rstrip("\n") for l in open(p) if l.strip()]
+    with open(p) as source:
+        return [l.rstrip("\n") for l in source if l.strip()]
 
 
-def run_case(exe, vecfile, tag, lat, varlat):
+def run_case(exe, vecfile, tag, lat, varlat, timeout=120):
     out = os.path.join(BUILD, tag + ".actual")
     mem = os.path.join(BUILD, tag + ".mem")
     exp = os.path.join(BUILD, tag + ".expected")
     expm = os.path.join(BUILD, tag + ".expmem")
-    sim = subprocess.run(["vvp", exe, "+vec=" + vecfile, "+out=" + out, "+memdump=" + mem], cwd=ROOT, capture_output=True, text=True)
     ref.run(vecfile, exp, expm, lat)
+    simlog = Path(BUILD) / (tag + ".sim.log")
+    try:
+        sim = subprocess.run(["vvp", exe, "+vec=" + vecfile, "+out=" + out, "+memdump=" + mem],
+                             cwd=ROOT, capture_output=True, text=True, timeout=timeout)
+    except subprocess.TimeoutExpired as error:
+        def decode(value):
+            return value.decode(errors="replace") if isinstance(value, bytes) else (value or "")
+        simlog.write_text(decode(error.stdout) + decode(error.stderr))
+        return ["simulator timed out after %s seconds; see %s" % (timeout, simlog)], [], 0, "-"
+    simlog.write_text(sim.stdout + sim.stderr)
+    if sim.returncode:
+        return ["simulator exited with code %d; see %s" % (sim.returncode, simlog)], [], 0, "-"
+    missing = [p for p in (out, mem) if not os.path.isfile(p)]
+    if missing:
+        return ["simulator did not produce output: %s; see %s" % (", ".join(missing), simlog)], [], 0, "-"
     a, e = read_lines(out), read_lines(exp)
     problems = []
     if "RESULT: ALL TESTS PASSED" not in sim.stdout:
@@ -176,8 +192,8 @@ def run_case(exe, vecfile, tag, lat, varlat):
         if x != y:
             problems.append("line %d differs:\n   DUT  : %s\n   MODEL: %s" % (i, x, y)); break
     # memory image
-    mm = [l.strip() for l in open(mem) if l.strip() and not l.startswith("//")]
-    em = [l.strip() for l in open(expm) if l.strip()]
+    mm = [l.strip() for l in read_lines(mem) if not l.startswith("//")]
+    em = [l.strip() for l in read_lines(expm)]
     if mm != em:
         bad = next((i for i, (p, q) in enumerate(zip(mm, em)) if p != q), None)
         problems.append("memory image differs (first at 0x%04x: DUT %s model %s)" % (bad or 0, mm[bad] if bad is not None else "?", em[bad] if bad is not None else "?"))
@@ -185,12 +201,22 @@ def run_case(exe, vecfile, tag, lat, varlat):
 
 
 def job(args):
-    exe, vecfile, tag, lat, varlat, name, seed = args
+    exe, vecfile, tag, lat, varlat, name, seed, timeout = args
     try:
-        problems, actual, ncmp, h = run_case(exe, vecfile, tag, lat, varlat)
+        problems, actual, ncmp, h = run_case(exe, vecfile, tag, lat, varlat, timeout)
     except Exception as ex:                          # keep the regression running, report the failure
         problems, actual, ncmp, h = ["exception: %r" % ex], [], 0, "-"
     return dict(name=name, seed=seed, lat=lat, varlat=varlat, tag=tag, vec=vecfile, problems=problems, actual=actual, ncmp=ncmp, h=h)
+
+
+def preserve_failure(result, faildir):
+    """Keep available evidence even when the simulator never opened its outputs."""
+    os.makedirs(faildir, exist_ok=True)
+    for ext in ("actual", "expected", "mem", "expmem", "sim.log"):
+        source = os.path.join(BUILD, result["tag"] + "." + ext)
+        if os.path.isfile(source):
+            shutil.copy(source, os.path.join(faildir, os.path.basename(source)))
+    shutil.copy(result["vec"], os.path.join(faildir, result["tag"] + ".vec"))
 
 
 def parse_args(argv=None):
@@ -199,6 +225,7 @@ def parse_args(argv=None):
     ap.add_argument("--gen-static", action="store_true")
     ap.add_argument("--txns", type=int, help="requests per vector (default: 2500, or 400 with --quick)")
     ap.add_argument("--jobs", type=int, default=max(1, (os.cpu_count() or 2)))
+    ap.add_argument("--timeout", type=float, default=120, help="maximum seconds per simulator run (default: 120)")
     ap.add_argument("--profile", action="append", choices=sorted(PROFILES), help="select a workload; repeat to select several")
     ap.add_argument("--seed", type=int, action="append", help="select a random seed; repeat to select several")
     ap.add_argument("--latency", type=int, action="append", help="select fixed memory latency (0..65535); repeatable")
@@ -206,6 +233,8 @@ def parse_args(argv=None):
     a = ap.parse_args(argv)
     if a.jobs < 1:
         ap.error("--jobs must be positive")
+    if not math.isfinite(a.timeout) or a.timeout <= 0:
+        ap.error("--timeout must be a finite positive number")
     if a.txns is not None and not 1 <= a.txns <= 262143:
         ap.error("--txns must be between 1 and 262143 (testbench vector capacity)")
     if a.latency and any(not 0 <= L <= 65535 for L in a.latency):
@@ -239,12 +268,12 @@ def main():
             vf = os.path.join(BUILD, "%s_seed%d.vec" % (prof, seed))
             open(vf, "w").write("\n".join(make_vectors(prof, seed, txns)) + "\n")
             for L in lats:
-                jobs.append((exes[L], vf, "%s_s%d_L%d" % (prof, seed, L), L, False, prof, seed))
-            jobs.append((exes_vl, vf, "%s_s%d_VL%d" % (prof, seed, VARLAT_MAX), VARLAT_MAX, True, prof, seed))
+                jobs.append((exes[L], vf, "%s_s%d_L%d" % (prof, seed, L), L, False, prof, seed, a.timeout))
+            jobs.append((exes_vl, vf, "%s_s%d_VL%d" % (prof, seed, VARLAT_MAX), VARLAT_MAX, True, prof, seed, a.timeout))
     for name in STATIC:
         vf = os.path.join(VECDIR, name + ".vec")
         for L in ([4] if a.quick else [1, 4, 16]):
-            jobs.append((exes.get(L) or compile_tb(L), vf, "%s_L%d" % (name, L), L, False, name, 0))
+            jobs.append((exes.get(L) or compile_tb(L), vf, "%s_L%d" % (name, L), L, False, name, 0, a.timeout))
 
     with cf.ThreadPoolExecutor(max_workers=a.jobs) as ex:
         results = list(ex.map(job, jobs))
@@ -252,11 +281,8 @@ def main():
     failed = [r for r in results if r["problems"]]
     faildir = os.path.join(BUILD, "failing") if a.rtl_dir else os.path.join(VECDIR, "failing")
     if failed:
-        os.makedirs(faildir, exist_ok=True)
         for r in failed:
-            for ext in ("actual", "expected"):
-                shutil.copy(os.path.join(BUILD, r["tag"] + "." + ext), os.path.join(faildir, r["tag"] + "." + ext))
-            shutil.copy(r["vec"], os.path.join(faildir, r["tag"] + ".vec"))
+            preserve_failure(r, faildir)
 
     # representative vectors + expected outputs (seed 1) are kept in the repo
     if not focused:
@@ -298,7 +324,7 @@ def main():
     lines.append("TOTAL runs=%d  passed=%d  failed=%d  (fixed-latency DUT transactions compared against the model: %d)" % (len(results), len(results) - len(failed), len(failed), tot_txn))
     for r in failed:
         lines.append("")
-        lines.append("FAILED CASE %s (vector preserved in verification/test_vectors/failing/)" % r["tag"])
+        lines.append("FAILED CASE %s (available evidence preserved in %s)" % (r["tag"], faildir))
         for p in r["problems"]: lines.append("  " + p.replace("\n", "\n  "))
     lines.append("RESULT: %s" % ("ALL COMPARISONS PASSED" if not failed else "MISMATCHES FOUND"))
     text = "\n".join(lines) + "\n"
