@@ -29,8 +29,8 @@ Output format is identical to the log written by testbench/cache_tb_vec.v.
 
 CLI: python3 -I verification/reference_model.py <vec> <out_log> <mem_dump> [latency]
 """
+import argparse
 import re
-import sys
 
 READ, WRITE, RESET, IDLE, END = 0x00, 0x01, 0x02, 0x03, 0xFF
 
@@ -148,7 +148,18 @@ def run(vec_path, out_path, dump_path, mem_latency=4):
     return m
 
 
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("vec", help="input vector file")
+    parser.add_argument("out_log", help="expected transaction and cache-state log")
+    parser.add_argument("mem_dump", help="expected memory image")
+    parser.add_argument("latency", nargs="?", type=int, default=4, help="memory latency (default: 4)")
+    args = parser.parse_args(argv)
+    try:
+        run(args.vec, args.out_log, args.mem_dump, args.latency)
+    except (OSError, ValueError) as error:
+        parser.error(str(error))
+
+
 if __name__ == "__main__":
-    if len(sys.argv) < 4:
-        raise SystemExit(__doc__)
-    run(sys.argv[1], sys.argv[2], sys.argv[3], int(sys.argv[4]) if len(sys.argv) > 4 else 4)
+    main()
