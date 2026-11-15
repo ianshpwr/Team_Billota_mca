@@ -25,15 +25,18 @@ phase1: | $(BUILD)
 	@echo "# command:  iverilog $(IVFLAGS) -s cache_tb -o $(BUILD)/cache_tb.vvp $(TB) $(RTL)" >> results/phase1_compile_log.txt
 	iverilog $(IVFLAGS) -s cache_tb -o $(BUILD)/cache_tb.vvp $(TB) $(RTL) >> results/phase1_compile_log.txt 2>&1; \
 	  rc=$$?; echo "# iverilog exit code: $$rc" >> results/phase1_compile_log.txt; cat results/phase1_compile_log.txt; exit $$rc
-	vvp $(BUILD)/cache_tb.vvp +vcd=results/phase1_waveform.vcd | tee results/phase1_test_results.txt
+	vvp $(BUILD)/cache_tb.vvp +vcd=results/phase1_waveform.vcd > results/phase1_test_results.txt 2>&1 || { cat results/phase1_test_results.txt; exit 1; }
+	@cat results/phase1_test_results.txt
 	@grep -q "RESULT: ALL TESTS PASSED" results/phase1_test_results.txt
 
 # --- Repeat the testbench at several main-memory latencies (no VCD) ---
 lat-sweep: | $(BUILD)
-	@set -e; for L in $(LATENCIES); do \
+	@set -e; : > results/phase1_latency_sweep.txt; for L in $(LATENCIES); do \
 	  iverilog $(IVFLAGS) -s cache_tb -P cache_tb.MEM_LATENCY=$$L -o $(BUILD)/cache_tb_L$$L.vvp $(TB) $(RTL); \
-	  vvp $(BUILD)/cache_tb_L$$L.vvp +novcd | grep -E "SUMMARY|RESULT|FAIL|MONITOR"; \
-	done | tee results/phase1_latency_sweep.txt
+	  vvp $(BUILD)/cache_tb_L$$L.vvp +novcd > $(BUILD)/lat_sweep_L$$L.log 2>&1 || { cat $(BUILD)/lat_sweep_L$$L.log; exit 1; }; \
+	  grep -E "SUMMARY|RESULT|FAIL|MONITOR" $(BUILD)/lat_sweep_L$$L.log >> results/phase1_latency_sweep.txt; \
+	  grep -q "RESULT: ALL TESTS PASSED" $(BUILD)/lat_sweep_L$$L.log || { cat $(BUILD)/lat_sweep_L$$L.log; exit 1; }; \
+	done; cat results/phase1_latency_sweep.txt
 
 # --- RTL-only elaboration check (no testbench) ---
 lint-rtl:
@@ -56,23 +59,33 @@ report:
 
 # --- Mechanical repository audit (structure, links, secrets, consistency, over-claims) ---
 audit:
-	python3 -I scripts/audit_checks.py | tee results/final_audit_checks.txt
+	python3 -I scripts/audit_checks.py > results/final_audit_checks.txt 2>&1 || { cat results/final_audit_checks.txt; exit 1; }
+	@cat results/final_audit_checks.txt
 
 # --- Everything, from a clean tree: Phase 1 + Phase 2 regression, report, audit ---
-final: phase1-all phase2 report audit
+final:
+	$(MAKE) phase1-all
+	$(MAKE) phase2
+	$(MAKE) report
+	$(MAKE) audit
 
 clean:
 	rm -rf $(BUILD)
 
 yosys:
-	sh scripts/yosys_check.sh | tee results/phase1_yosys_check.txt
+	sh scripts/yosys_check.sh > results/phase1_yosys_check.txt 2>&1 || { cat results/phase1_yosys_check.txt; exit 1; }
+	@cat results/phase1_yosys_check.txt
 
 # --- Text trace of the Phase 1 VCD (evidence; not a waveform-viewer screenshot) ---
 trace:
 	python3 -I scripts/vcd_trace.py results/phase1_waveform.vcd > results/phase1_waveform_trace.txt
 
 # --- Everything Phase 1 produces, from a clean tree ---
-phase1-all: clean phase1 lat-sweep mutation yosys trace
+phase1-all:
+	$(MAKE) clean
+	$(MAKE) phase1
+	$(MAKE) lat-sweep mutation yosys trace
 
 mutation: | $(BUILD)
-	python3 -I scripts/mutation_check.py . $(BUILD)/mutants | tee results/phase1_mutation_results.txt
+	python3 -I scripts/mutation_check.py . $(BUILD)/mutants > results/phase1_mutation_results.txt 2>&1 || { cat results/phase1_mutation_results.txt; exit 1; }
+	@cat results/phase1_mutation_results.txt

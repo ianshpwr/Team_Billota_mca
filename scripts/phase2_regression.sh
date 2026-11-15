@@ -49,15 +49,20 @@ cat results/phase2_latency_sweep.txt
 if grep -q FAIL results/phase2_latency_sweep.txt; then echo "SWEEP HAS FAILURES"; exit 1; fi
 
 echo "[4/6] reference-model + randomized regression"
-python3 -I verification/randomized_tests.py | tail -4
+python3 -I verification/randomized_tests.py > build/reference_regression.log 2>&1 || { cat build/reference_regression.log; exit 1; }
+tail -4 build/reference_regression.log
 
 echo "[5/6] mutation check (Phase 1 + Phase 2 testbenches)"
-python3 -I scripts/mutation_check_p2.py . build/mutants_p2 | tee results/phase2_mutation_results.txt | tail -3
+python3 -I scripts/mutation_check_p2.py . build/mutants_p2 > results/phase2_mutation_results.txt 2>&1 || { cat results/phase2_mutation_results.txt; exit 1; }
+tail -3 results/phase2_mutation_results.txt
 
 echo "[6/6] waveform VCDs, synthesis/lint review"
 iverilog $FLAGS -s cache_tb_vec -P cache_tb_vec.MEM_LATENCY=4 -o build/vec4.vvp testbench/cache_tb_vec.v testbench/wave_probe.v $RTL
 for n in wave_cold_miss_refill wave_cache_hit wave_conflict_replace wave_write_hit wave_write_miss_alloc wave_back_to_back; do
-  vvp build/vec4.vvp +vec=verification/test_vectors/$n.vec +out=build/$n.out +vcd=results/waveforms/$n.vcd | grep -E "^RESULT"
+  vvp build/vec4.vvp +vec=verification/test_vectors/$n.vec +out=build/$n.out +vcd=results/waveforms/$n.vcd > build/$n.log 2>&1 || { cat build/$n.log; exit 1; }
+  grep -q "^RESULT: ALL TESTS PASSED" build/$n.log || { cat build/$n.log; exit 1; }
+  grep -E "^RESULT" build/$n.log
 done
-sh scripts/synthesis_review.sh > results/synthesis_review_raw.txt 2>&1 && echo "synthesis review: exit 0"
+sh scripts/synthesis_review.sh > results/synthesis_review_raw.txt 2>&1 || { cat results/synthesis_review_raw.txt; exit 1; }
+echo "synthesis review: exit 0"
 echo "PHASE 2 REGRESSION COMPLETE"
