@@ -1,0 +1,29 @@
+name: Cache verification
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+      - name: Install simulator
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y iverilog
+      - name: Verify Python tools, RTL, directed tests and random comparisons
+        run: make smoke
+      - name: Print simulator diagnostics on failure
+        if: failure()
+        run: |
+          find build -type f -name '*.log' -exec sh -c 'echo "$1"; tail -80 "$1"' sh {} \;

@@ -58,6 +58,11 @@ macOS: `brew install icarus-verilog yosys verilator graphviz tectonic surfer`. L
 
 ## Reproduce the results from a clean checkout
 
+For everyday changes, run `make test-python` (no simulator needed) or `make smoke`
+(Python checks, RTL elaboration, directed tests and random smoke regression).
+See the [development guide](docs/development.md) for focused workloads, seeds,
+latencies and failure diagnostics. GitHub Actions runs `make smoke` on pushes and PRs.
+
 ```sh
 make phase1        # compile (-g2001 -Wall, no warnings), simulate Phase 1 testbench, VCD + logs   (~2 s)
 make phase1-all    # + latency sweep, mutation check, Yosys latch check

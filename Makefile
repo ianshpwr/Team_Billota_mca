@@ -7,13 +7,21 @@ BUILD    := build
 IVFLAGS  := -g2001 -Wall
 LATENCIES:= 1 2 4 8
 
-.PHONY: all test-python phase1 phase1-all phase2 phase2-reports report audit final lat-sweep lint-rtl mutation yosys trace clean
+.PHONY: all test-python smoke phase1 phase1-all phase2 phase2-reports report audit final lat-sweep lint-rtl mutation yosys trace clean
 
 all: phase1
 
 # Fast verification of the independent Python tools; no HDL tools required.
 test-python:
 	python3 -I -m unittest discover -s verification/tests -v
+
+# Developer/CI smoke run: keep fresh logs in build/, preserving saved evidence.
+smoke: test-python lint-rtl | $(BUILD)
+	iverilog $(IVFLAGS) -I testbench -s cache_tb_directed -o $(BUILD)/smoke_directed.vvp testbench/cache_tb_directed.v $(RTL)
+	vvp $(BUILD)/smoke_directed.vvp > $(BUILD)/smoke_directed.log 2>&1 || { cat $(BUILD)/smoke_directed.log; exit 1; }
+	@grep -q "RESULT: ALL TESTS PASSED" $(BUILD)/smoke_directed.log || { cat $(BUILD)/smoke_directed.log; exit 1; }
+	@grep -E "SUMMARY|^RESULT" $(BUILD)/smoke_directed.log
+	python3 -I verification/randomized_tests.py --quick --jobs 2
 
 $(BUILD):
 	mkdir -p $(BUILD)
