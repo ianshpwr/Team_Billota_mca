@@ -24,7 +24,7 @@ def parse(path):
             if not t: continue
             if t[0] == "$scope": scope.append(t[2])
             elif t[0] == "$upscope": scope.pop()
-            elif t[0] == "$var" and scope == ["cache_tb"]:
+            elif t[0] == "$var" and scope in (["cache_tb"], ["cache_tb_vec"]):
                 ids.setdefault(t[3], t[4])   # id -> name (top-level TB scope only)
             elif t[0] == "$enddefinitions": break
         cur = {n: "x" for n in ids.values()}

@@ -36,3 +36,11 @@ b{address} "
                 result = self.trace(address=value)
                 self.assertEqual(result.returncode, 0, result.stderr)
                 self.assertIn("x", result.stdout)
+
+    def test_both_testbench_scopes_produce_clock_rows(self):
+        for scope in ("cache_tb", "cache_tb_vec"):
+            with self.subTest(scope=scope):
+                result = self.trace(scope=scope)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertEqual(len(result.stdout.splitlines()), 3)
+                self.assertIn("000A", result.stdout)

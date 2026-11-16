@@ -49,3 +49,28 @@ sequence. Invalid words and unsupported opcodes report their source file and lin
 Build commands preserve failing tool exit codes even when output includes an
 earlier PASS marker. `make phase1-all` completes cleanup before running checks;
 `make final` runs its phases in sequence, including under parallel Make.
+
+## Inspect tool diagnostics and waveform traces
+
+The reference-model command accepts the same positional inputs as before and
+offers `--help`. Missing files, malformed vectors and invalid latency arguments
+produce a concise error with exit status 2. Malformed vectors include the source
+file and line number; input errors are detected before output logs are written.
+
+```sh
+python3 -I verification/reference_model.py verification/test_vectors/wave_cache_hit.vec build/expected.log build/expected.mem 4
+python3 -I verification/performance.py build/expected.log 4
+python3 -I scripts/vcd_trace.py results/phase1_waveform.vcd 0 20
+```
+
+Create `build/` first if running these commands without a previous build.
+Performance analysis validates transaction indices, hexadecimal address/data
+fields, and memory flags: a miss fetches one block, and every write goes through
+to memory. Corrupt records fail with their log line number instead of producing
+misleading metrics.
+
+Text traces support both `cache_tb` and `cache_tb_vec` waveform scopes. Unknown
+and high-impedance values are shown as `x`; valid binary values retain the usual
+hexadecimal formatting. Samples describe values immediately before a rising edge.
+Each regression case removes old DUT log and memory files before simulation,
+so missing new output cannot be mistaken for a passing result from an earlier run.
