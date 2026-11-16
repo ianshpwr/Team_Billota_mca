@@ -52,7 +52,7 @@ def parse(path):
     return rows
 
 def fmt(name, v):
-    if v is None or "x" in v.lower(): return "x"
+    if v is None or any(bit in v.lower() for bit in "xz"): return "x"
     n = int(v, 2)
     if name == "dbg_state": return STATES.get(n, str(n))
     if name in ("cpu_addr","mem_addr","dbg_tag"): return "%04X" % n if name != "dbg_tag" else "%03X" % n
