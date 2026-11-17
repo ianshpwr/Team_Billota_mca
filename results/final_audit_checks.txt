@@ -1,0 +1,23 @@
+PASS required files/directories present (46)                                             
+PASS six waveform screenshots present                                                    - 6 png
+PASS local markdown links resolve (22 files scanned)                                     
+PASS no credentials/secret patterns in tracked-type files                                
+PASS no stray temporary build files outside ignored dirs                                 
+PASS .gitignore covers build/, .venv/, .playwright-mcp/                                  - build .venv .playwright-mcp
+PASS no tracked-type file larger than 2 MB                                               - []
+PASS report PDF valid header and >= 5 pages (pdfinfo)                                    - pages=6 size=726KB
+PASS all report figures exist (6)                                                        
+PASS report has abstract, keywords, references                                           
+PASS report cites 10 references, all cited in text                                       
+PASS every test ID in the traceability matrix exists in TEST_RESULTS.md (45 IDs)         
+PASS traceability evidence paths exist                                                   
+PASS complete_test_results: ALL TESTS PASSED and 0 failed tests                          
+PASS reference model: ALL COMPARISONS PASSED                                             
+PASS latency sweep: no FAIL rows                                                         
+PASS TEST_RESULTS.md: no FAIL entries                                                    
+PASS Phase 1 evidence intact (122 checks, 0 failures)                                    
+PASS mutation: Phase 2 bench detects all mutants                                         
+PASS no unqualified frequency / FPGA-run / video-recorded claims                         
+PASS INFO: 81 human-input placeholders remain (names, enrollment, URL, video, copyright) 
+
+AUDIT CHECKS: 21, FAILED: 0

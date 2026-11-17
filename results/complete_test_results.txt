@@ -1,0 +1,615 @@
+# complete_test_results.txt - Phase 2 consolidated simulation evidence
+# generated 2026-11-15 20:03 by scripts/gen_phase2_reports.py from build/*.log, results/*
+# tool: Icarus Verilog version 13.0 (stable) (v13_0)
+# command (per latency L): iverilog -g2001 -Wall -I testbench -s cache_tb_directed -P cache_tb_directed.MEM_LATENCY=L -P cache_tb_directed.EXHAUSTIVE=E testbench/cache_tb_directed.v rtl/*.v ; vvp
+# compile warnings emitted by iverilog -Wall for all Phase 2 testbenches: 0 lines
+
+====================================================================================================
+SECTION 1: full directed-testbench log, MEM_LATENCY=4, EXHAUSTIVE=1
+====================================================================================================
+==== Phase 2 directed testbench start: MEM_LATENCY=4 (effective 4) EXHAUSTIVE=1 ====
+[TEST] D-00 : Power-on reset initialises all storage (no X values)
+       init: first reset after simulation start; nothing accessed yet
+       stim: inspect valid/tag/data arrays and visible outputs
+  [PASS] D-00a valid bits all 0 | expected=0x0 actual=0x0
+  [PASS] D-00b all 16 tag/data entries are X-free after reset | 16 sub-checks, 0 mismatches
+  [PASS] D-00c CPU/memory outputs are known (no X) | expected=0x0 actual=0x0
+[TEST-RESULT] D-00 PASS (3 checks)
+[TEST] D-01 : Cold cache miss
+       init: after reset, all 16 lines invalid
+       stim: read 0x0004 (tag 0, index 1, offset 0)
+  [PASS] D-01a line 1 invalid before the access | expected=0x0 actual=0x0
+  [PASS] D-01b access classified as MISS | expected=0x0 actual=0x0
+  [PASS] D-01c returned byte equals memory image | expected=0x5e actual=0x5e
+  [PASS] D-01d exactly one block read from memory | expected=0x1 actual=0x1
+  [PASS] D-01e no memory write | expected=0x0 actual=0x0
+  [PASS] D-01f line 1 valid after refill | expected=0x1 actual=0x1
+  [PASS] D-01g line 1 tag = 0x000 | expected=0x0 actual=0x0
+  [PASS] D-01h line 1 block = full 4-byte memory block | expected=0x61605f5e actual=0x61605f5e
+[TEST-RESULT] D-01 PASS (8 checks)
+[TEST] D-02 : Repeated cache hit
+       init: line 1 holds block 0x0004..07 (from D-01)
+       stim: read 0x0004 three times
+  [PASS] D-02a repeat access is HIT | expected=0x1 actual=0x1
+  [PASS] D-02b returned byte correct | expected=0x5e actual=0x5e
+  [PASS] D-02c no memory read on hit | expected=0x1 actual=0x1
+  [PASS] D-02a repeat access is HIT | expected=0x1 actual=0x1
+  [PASS] D-02b returned byte correct | expected=0x5e actual=0x5e
+  [PASS] D-02c no memory read on hit | expected=0x1 actual=0x1
+  [PASS] D-02a repeat access is HIT | expected=0x1 actual=0x1
+  [PASS] D-02b returned byte correct | expected=0x5e actual=0x5e
+  [PASS] D-02c no memory read on hit | expected=0x1 actual=0x1
+[TEST-RESULT] D-02 PASS (9 checks)
+[TEST] D-03 : Access to different memory blocks
+       init: line 1 valid; lines 2,3,4 invalid
+       stim: read 0x0008, 0x000C, 0x0010 then re-read all
+  [PASS] D-03a 0x0008 (index 2) cold MISS | expected=0x0 actual=0x0
+  [PASS] D-03a   returned byte equals memory image | expected=0x62 actual=0x62
+  [PASS] D-03b 0x000C (index 3) cold MISS | expected=0x0 actual=0x0
+  [PASS] D-03b   returned byte equals memory image | expected=0x66 actual=0x66
+  [PASS] D-03c 0x0010 (index 4) cold MISS | expected=0x0 actual=0x0
+  [PASS] D-03c   returned byte equals memory image | expected=0x6a actual=0x6a
+  [PASS] D-03d 0x0004 still HIT (different line) | expected=0x1 actual=0x1
+  [PASS] D-03d   returned byte equals memory image | expected=0x5e actual=0x5e
+  [PASS] D-03e 0x0008 still HIT | expected=0x1 actual=0x1
+  [PASS] D-03e   returned byte equals memory image | expected=0x62 actual=0x62
+  [PASS] D-03f 0x0010 still HIT | expected=0x1 actual=0x1
+  [PASS] D-03f   returned byte equals memory image | expected=0x6a actual=0x6a
+  [PASS] D-03g four lines valid | expected=0x4 actual=0x4
+[TEST-RESULT] D-03 PASS (13 checks)
+[TEST] D-04 : Same-index conflict
+       init: line 1 holds tag 0x000; lines 2-4 valid
+       stim: read 0x0044 (tag 1, index 1) which collides with 0x0004
+  [PASS] D-04a conflicting address is MISS | expected=0x0 actual=0x0
+  [PASS] D-04b miss happened on a VALID line (conflict) | expected=0x1 actual=0x1
+  [PASS] D-04c returned byte correct | expected=0x9e actual=0x9e
+  [PASS] D-04d one block refill | expected=0x5 actual=0x5
+[TEST-RESULT] D-04 PASS (4 checks)
+[TEST] D-05 : Cache replacement
+       init: after D-04
+       stim: inspect line 1 and the neighbouring lines
+  [PASS] D-05a line 1 tag replaced by 0x001 | expected=0x1 actual=0x1
+  [PASS] D-05b line 1 data replaced by block 0x0044..47 | expected=0xa1a09f9e actual=0xa1a09f9e
+  [PASS] D-05c line 1 still valid | expected=0x1 actual=0x1
+  [PASS] D-05d line 2 untouched | expected=0x65646362 actual=0x65646362
+  [PASS] D-05e line 3 untouched | expected=0x69686766 actual=0x69686766
+  [PASS] D-05f line 4 untouched | expected=0x6d6c6b6a actual=0x6d6c6b6a
+  [PASS] D-05g valid-line count unchanged | expected=0x4 actual=0x4
+[TEST-RESULT] D-05 PASS (7 checks)
+[TEST] D-06 : Re-access after replacement
+       init: line 1 holds tag 0x001
+       stim: read 0x0004 (evicted), 0x0044 (now evicted), 0x0004 again
+  [PASS] D-06a evicted block 0x0004 -> MISS | expected=0x0 actual=0x0
+  [PASS] D-06a   returned byte equals memory image | expected=0x5e actual=0x5e
+  [PASS] D-06b line 1 tag back to 0x000 | expected=0x0 actual=0x0
+  [PASS] D-06c 0x0044 evicted in turn -> MISS | expected=0x0 actual=0x0
+  [PASS] D-06c   returned byte equals memory image | expected=0x9e actual=0x9e
+  [PASS] D-06d 0x0044 now HIT | expected=0x1 actual=0x1
+  [PASS] D-06d   returned byte equals memory image | expected=0x9e actual=0x9e
+  [PASS] D-06e 0x0004 -> MISS again | expected=0x0 actual=0x0
+  [PASS] D-06e   returned byte equals memory image | expected=0x5e actual=0x5e
+[TEST-RESULT] D-06 PASS (9 checks)
+[TEST] D-07 : Different offsets within the same block
+       init: reset
+       stim: read offset 0..3 of 0x0020 and offset 3..0 of 0x0030
+  [PASS] D-07a 0x0020 (offset 0) cold MISS | expected=0x0 actual=0x0
+  [PASS] D-07a   returned byte equals memory image | expected=0x7a actual=0x7a
+  [PASS] D-07b 0x0021 (offset 1) HIT | expected=0x1 actual=0x1
+  [PASS] D-07b   returned byte equals memory image | expected=0x7b actual=0x7b
+  [PASS] D-07c 0x0022 (offset 2) HIT | expected=0x1 actual=0x1
+  [PASS] D-07c   returned byte equals memory image | expected=0x7c actual=0x7c
+  [PASS] D-07d 0x0023 (offset 3) HIT | expected=0x1 actual=0x1
+  [PASS] D-07d   returned byte equals memory image | expected=0x7d actual=0x7d
+  [PASS] D-07e 0x0033 (offset 3 first) cold MISS | expected=0x0 actual=0x0
+  [PASS] D-07e   returned byte equals memory image | expected=0x8d actual=0x8d
+  [PASS] D-07f 0x0032 (offset 2) HIT | expected=0x1 actual=0x1
+  [PASS] D-07f   returned byte equals memory image | expected=0x8c actual=0x8c
+  [PASS] D-07g 0x0031 (offset 1) HIT | expected=0x1 actual=0x1
+  [PASS] D-07g   returned byte equals memory image | expected=0x8b actual=0x8b
+  [PASS] D-07h 0x0030 (offset 0) HIT | expected=0x1 actual=0x1
+  [PASS] D-07h   returned byte equals memory image | expected=0x8a actual=0x8a
+[TEST-RESULT] D-07 PASS (16 checks)
+[TEST] D-08 : All four byte positions map to the right block lane
+       init: reset
+       stim: first-miss at each offset 0..3 in separate blocks; compare to block bits
+  [PASS] D-08a offsets 0..3 select bits [7:0],[15:8],[23:16],[31:24] | 12 sub-checks, 0 mismatches
+[TEST-RESULT] D-08 PASS (1 checks)
+[TEST] D-09 : Correct byte returned on hit
+       init: reset; fill all 16 lines (tag 8)
+       stim: read all 64 bytes of the cached 64-byte window
+  [PASS] D-09a 64 hit reads return the correct byte | 128 sub-checks, 0 mismatches
+  [PASS] D-09b 64 additional hits counted | expected=0x4d actual=0x4d
+[TEST-RESULT] D-09 PASS (2 checks)
+[TEST] D-10 : Correct byte returned on miss
+       init: reset
+       stim: one cold miss in each of the 16 lines (offset varies)
+  [PASS] D-10a 16 cold misses return the correct byte | 32 sub-checks, 0 mismatches
+[TEST-RESULT] D-10 PASS (1 checks)
+[TEST] D-11 : Correct full-block refill
+       init: after D-10
+       stim: compare every line (valid, tag, 32-bit data) with memory
+  [PASS] D-11a all 16 lines refilled with the full memory block | 48 sub-checks, 0 mismatches
+  [PASS] D-11b 16 valid lines | expected=0x10 actual=0x10
+[TEST-RESULT] D-11 PASS (2 checks)
+[TEST] D-12 : Repeated reads
+       init: reset
+       stim: read 0x0124 twenty times
+  [PASS] D-12a 20 reads all return the correct byte | 20 sub-checks, 0 mismatches
+  [PASS] D-12b exactly one miss | expected=0x2f actual=0x2f
+  [PASS] D-12c 19 hits | expected=0x60 actual=0x60
+  [PASS] D-12d exactly one memory read | expected=0x2f actual=0x2f
+[TEST-RESULT] D-12 PASS (4 checks)
+[TEST] D-13 : Sequential requests
+       init: reset
+       stim: read 0x0000..0x007F byte by byte (two tags over 16 lines)
+  [PASS] D-13a 128 sequential reads: correct data, 1 miss per block | 256 sub-checks, 0 mismatches
+  [PASS] D-13b 32 misses | expected=0x4f actual=0x4f
+  [PASS] D-13c 96 hits | expected=0xc0 actual=0xc0
+  [PASS] D-13d 32 memory block reads | expected=0x4f actual=0x4f
+[TEST-RESULT] D-13 PASS (4 checks)
+[TEST] D-14 : Back-to-back requests
+       init: reset
+       stim: 8 reads issued as soon as the controller is ready again
+  [PASS] D-14a 8 back-to-back reads, one idle cycle between transactions | 15 sub-checks, 0 mismatches
+[TEST-RESULT] D-14 PASS (1 checks)
+[TEST] D-15 : Write hit
+       init: reset; block 0x0104 cached
+       stim: write 0x0105 = 0xA1
+  [PASS] D-15a write classified as HIT | expected=0x1 actual=0x1
+  [PASS] D-15b no block fetch | expected=0x58 actual=0x58
+  [PASS] D-15c one memory write | expected=0x1 actual=0x1
+  [PASS] D-15d cache block updated at offset 1 only | expected=0x6061a15f actual=0x6061a15f
+  [PASS] D-15e memory byte 0x0105 = 0xA1 | expected=0xa1 actual=0xa1
+  [PASS] D-15f write response carries cpu_rdata = 0 | expected=0x0 actual=0x0
+[TEST-RESULT] D-15 PASS (6 checks)
+[TEST] D-16 : Write miss
+       init: reset; nothing cached
+       stim: write 0x0208 = 0x55 (tag 8, index 2)
+  [PASS] D-16a write classified as MISS | expected=0x0 actual=0x0
+  [PASS] D-16b block fetched (write-allocate) | expected=0x59 actual=0x59
+  [PASS] D-16c byte written through to memory | expected=0x2 actual=0x2
+  [PASS] D-16d memory byte 0x0208 = 0x55 | expected=0x55 actual=0x55
+[TEST-RESULT] D-16 PASS (4 checks)
+[TEST] D-17 : Write allocation
+       init: after D-16
+       stim: inspect line 2; read the other bytes of the block
+  [PASS] D-17a line 2 allocated (valid) | expected=0x1 actual=0x1
+  [PASS] D-17b line 2 tag = 0x008 | expected=0x8 actual=0x8
+  [PASS] D-17c line 2 = fetched block with byte 0 replaced | expected=0x63626555 actual=0x63626555
+  [PASS] D-17d 0x0208 (written byte) HIT | expected=0x1 actual=0x1
+  [PASS] D-17d   returned byte equals memory image | expected=0x55 actual=0x55
+  [PASS] D-17e 0x0209 (fetched, unwritten) HIT | expected=0x1 actual=0x1
+  [PASS] D-17e   returned byte equals memory image | expected=0x65 actual=0x65
+  [PASS] D-17f 0x020A HIT | expected=0x1 actual=0x1
+  [PASS] D-17f   returned byte equals memory image | expected=0x62 actual=0x62
+  [PASS] D-17g 0x020B HIT | expected=0x1 actual=0x1
+  [PASS] D-17g   returned byte equals memory image | expected=0x63 actual=0x63
+  [PASS] D-17h no further memory reads | expected=0x59 actual=0x59
+[TEST-RESULT] D-17 PASS (12 checks)
+[TEST] D-18 : Write-through verification (cache vs main memory)
+       init: reset
+       stim: mixed write hits/misses; after each write compare memory, cache, commit count
+  [PASS] D-18a write-through: memory, cache and commit count agree | 96 sub-checks, 0 mismatches
+  [PASS] D-18b every valid line equals memory block (coherence) | expected=0x0 actual=0x0
+  [PASS] D-18c whole 64 KiB memory equals scoreboard | expected=0x0 actual=0x0
+  [PASS] D-18d 24 stores -> 24 memory array writes | expected=0x1a actual=0x1a
+[TEST-RESULT] D-18 PASS (4 checks)
+[TEST] D-19 : Byte-level write
+       init: reset; block 0x0300 cached
+       stim: write 0x11,0x22,0x33,0x44 to offsets 0..3, one at a time
+  [PASS] D-19a four single-byte writes build the expected block | 12 sub-checks, 0 mismatches
+  [PASS] D-19b final block = 0x44332211 | expected=0x44332211 actual=0x44332211
+[TEST-RESULT] D-19 PASS (2 checks)
+[TEST] D-20 : Preservation of unaffected bytes
+       init: reset
+       stim: one byte written to each offset, on a HIT and on a MISS
+  [PASS] D-20a unaffected bytes preserved for all offsets, hit and miss | 20 sub-checks, 0 mismatches
+[TEST-RESULT] D-20 PASS (1 checks)
+[TEST] D-21 : Read-after-write consistency
+       init: reset
+       stim: write then read same/other bytes via hit and miss paths
+  [PASS] D-21a read back written byte (HIT) | expected=0x1 actual=0x1
+  [PASS] D-21a   returned byte equals memory image | expected=0xab actual=0xab
+  [PASS] D-21b value is 0xAB | expected=0xab actual=0xab
+  [PASS] D-21c neighbour byte unchanged (HIT) | expected=0x1 actual=0x1
+  [PASS] D-21c   returned byte equals memory image | expected=0x60 actual=0x60
+  [PASS] D-21d read back second written byte | expected=0x1 actual=0x1
+  [PASS] D-21d   returned byte equals memory image | expected=0xcd actual=0xcd
+  [PASS] D-21e value is 0xCD | expected=0xcd actual=0xcd
+  [PASS] D-21f first written byte still 0xAB | expected=0x1 actual=0x1
+  [PASS] D-21f   returned byte equals memory image | expected=0xab actual=0xab
+  [PASS] D-21g value is 0xAB | expected=0xab actual=0xab
+  [PASS] D-21h after reset read comes from memory (MISS) | expected=0x0 actual=0x0
+  [PASS] D-21h   returned byte equals memory image | expected=0xcd actual=0xcd
+  [PASS] D-21i memory returns 0xCD | expected=0xcd actual=0xcd
+[TEST-RESULT] D-21 PASS (14 checks)
+[TEST] D-22 : Main-memory consistency after cache replacement
+       init: reset
+       stim: write 0x0404/0x0406, evict by conflict read, re-read
+  [PASS] D-22a line 1 tag = 0x010 | expected=0x10 actual=0x10
+  [PASS] D-22b conflicting read 0x0004 evicts line -> MISS | expected=0x0 actual=0x0
+  [PASS] D-22b   returned byte equals memory image | expected=0x5e actual=0x5e
+  [PASS] D-22c memory kept 0x9C (no write-back needed) | expected=0x9c actual=0x9c
+  [PASS] D-22d memory kept 0x7E | expected=0x7e actual=0x7e
+  [PASS] D-22e re-read 0x0404 -> MISS (evicted) | expected=0x0 actual=0x0
+  [PASS] D-22e   returned byte equals memory image | expected=0x9c actual=0x9c
+  [PASS] D-22f refetched value 0x9C | expected=0x9c actual=0x9c
+  [PASS] D-22g 0x0406 -> HIT | expected=0x1 actual=0x1
+  [PASS] D-22g   returned byte equals memory image | expected=0x7e actual=0x7e
+  [PASS] D-22h refetched value 0x7E | expected=0x7e actual=0x7e
+  [PASS] D-22i refilled block equals memory block | expected=0x5d7eee9c actual=0x5d7eee9c
+[TEST-RESULT] D-22 PASS (12 checks)
+[TEST] D-23 : Reset while idle
+       init: cache full of valid lines, controller idle
+       stim: assert rst for 1 cycle
+  [PASS] D-23a 16 valid lines before reset | expected=0x10 actual=0x10
+  [PASS] D-23b valid bits cleared | expected=0x0 actual=0x0
+  [PASS] D-23c FSM in IDLE | expected=0x0 actual=0x0
+  [PASS] D-23d cpu_ready high | expected=0x1 actual=0x1
+  [PASS] D-23e no response | expected=0x0 actual=0x0
+  [PASS] D-23f mem_req low | expected=0x0 actual=0x0
+  [PASS] D-23g memory contents untouched by reset | expected=0x0 actual=0x0
+  [PASS] D-23h previously cached address now MISS | expected=0x0 actual=0x0
+  [PASS] D-23h   returned byte equals memory image | expected=0x62 actual=0x62
+[TEST-RESULT] D-23 PASS (9 checks)
+[TEST] D-24 : Reset between transactions
+       init: idle between requests
+       stim: read A; reset; read A; write B; reset; read B
+  [PASS] D-24a read 0x0900 MISS | expected=0x0 actual=0x0
+  [PASS] D-24a   returned byte equals memory image | expected=0x63 actual=0x63
+  [PASS] D-24b read 0x0900 after reset -> MISS again | expected=0x0 actual=0x0
+  [PASS] D-24b   returned byte equals memory image | expected=0x63 actual=0x63
+  [PASS] D-24c valid bits cleared again | expected=0x0 actual=0x0
+  [PASS] D-24d read written address after reset -> MISS | expected=0x0 actual=0x0
+  [PASS] D-24d   returned byte equals memory image | expected=0x42 actual=0x42
+  [PASS] D-24e write-through survived the reset | expected=0x42 actual=0x42
+[TEST-RESULT] D-24 PASS (8 checks)
+[TEST] D-24R : Reset during an ACTIVE memory transaction (read miss)
+       init: reset each iteration
+       stim: reset k cycles after acceptance for every k in 0..12+2L (read miss)
+  [PASS] D-24Ra read-miss aborted at every phase: clean recovery | 168 sub-checks, 0 mismatches
+  [PASS] D-24Rb no monitor errors / spurious responses | expected=0x0 actual=0x0
+[TEST-RESULT] D-24R PASS (2 checks)
+[TEST] D-24W : Reset during an ACTIVE memory transaction (write hit)
+       init: line cached, then write
+       stim: reset k cycles after acceptance for every k (write hit / write-through)
+  [PASS] D-24Wa write-hit aborted at every phase: memory = committed-or-original | 168 sub-checks, 0 mismatches
+  [PASS] D-24Wb no monitor errors / spurious responses | expected=0x0 actual=0x0
+[TEST-RESULT] D-24W PASS (2 checks)
+[TEST] D-24A : Reset during an ACTIVE memory transaction (write miss)
+       init: cache empty, then write
+       stim: reset k cycles after acceptance for every k (write-allocate)
+  [PASS] D-24Aa write-miss aborted at every phase: memory = committed-or-original | 168 sub-checks, 0 mismatches
+  [PASS] D-24Ab no monitor errors / spurious responses | expected=0x0 actual=0x0
+[TEST-RESULT] D-24A PASS (2 checks)
+[TEST] D-25 : Delayed memory response
+       init: reset
+       stim: observe wait states during read miss, write hit, write miss
+  [PASS] D-25a MEMORY_READ_WAIT lasted exactly the measured memory latency | expected=0x4 actual=0x4
+  [PASS] D-25b no MEMORY_WRITE_WAIT on a read | expected=0x0 actual=0x0
+  [PASS] D-25c MEMORY_WRITE_WAIT = measured latency + 1 (request starts in this state) | expected=0x5 actual=0x5
+  [PASS] D-25d no read wait on write hit | expected=0x0 actual=0x0
+  [PASS] D-25e write miss: read wait + write wait = total measured latency + 1 | expected=0x9 actual=0x9
+  [PASS] D-25f no response before the memory finished (monitor) | expected=0x0 actual=0x0
+  [PASS] D-25g wait length equals configured MEM_LATENCY | expected=0x4 actual=0x4
+[TEST-RESULT] D-25 PASS (7 checks)
+[TEST] D-26 : Request held high across multiple cycles
+       init: reset
+       stim: cpu_req stays 1 while the next request is presented; 12 mixed ops, 6 identical reads, 5 identical writes
+  [PASS] D-26a all 12 requests accepted exactly once | expected=0xc actual=0xc
+  [PASS] D-26b all 12 responses received | expected=0xc actual=0xc
+  [PASS] D-26c read data / ordering correct | expected=0x0 actual=0x0
+  [PASS] D-26d cpu_req was held high for > 40 cycles | expected=0x1 actual=0x1
+  [PASS] D-26e 4 stores -> 4 memory writes (no duplicates) | expected=0x49 actual=0x49
+  [PASS] D-26f 6 identical held reads: 6 accepted | expected=0x6 actual=0x6
+  [PASS] D-26g 6 responses, data correct | expected=0x0 actual=0x0
+  [PASS] D-26h at most one refill for the identical reads | expected=0x1 actual=0x1
+  [PASS] D-26i 5 identical held writes: 5 accepted | expected=0x5 actual=0x5
+  [PASS] D-26j 5 responses | expected=0x5 actual=0x5
+  [PASS] D-26k 5 requests -> exactly 5 memory writes | expected=0x4e actual=0x4e
+  [PASS] D-26l memory byte = 0x77 | expected=0x77 actual=0x77
+  [PASS] D-26m no monitor errors | expected=0x0 actual=0x0
+[TEST-RESULT] D-26 PASS (13 checks)
+[TEST] D-27 : Response handshake
+       init: reset
+       stim: check resp pulse width, ready low while busy, ready high the cycle after response
+  [PASS] D-27a cpu_ready high in the cycle after the response | expected=0x1 actual=0x1
+  [PASS] D-27b cpu_resp_valid low in the cycle after the response | expected=0x0 actual=0x0
+  [PASS] D-27c same for a hit response: ready high | expected=0x1 actual=0x1
+  [PASS] D-27d same for a hit response: resp low | expected=0x0 actual=0x0
+  [PASS] D-27e monitor: 1-cycle pulse, ready low during busy/response | expected=0x0 actual=0x0
+[TEST-RESULT] D-27 PASS (5 checks)
+[TEST] D-28 : No duplicate writes
+       init: reset
+       stim: 30 stores (hit/miss mix) + held-high stream; count array commits
+  [PASS] D-28a each store caused exactly one memory array write | 30 sub-checks, 0 mismatches
+  [PASS] D-28b 30 stores -> 30 array commits | expected=0x6c actual=0x6c
+  [PASS] D-28c 30 stores -> 30 mem_done(write) pulses | expected=0x6a actual=0x6a
+  [PASS] D-28d held-high 8-store stream: 8 commits | expected=0x74 actual=0x74
+  [PASS] D-28e no monitor errors | expected=0x0 actual=0x0
+[TEST-RESULT] D-28 PASS (5 checks)
+[TEST] D-29 : No premature ready/response
+       init: reset
+       stim: all four transaction types; compare response time with required memory completion
+  [PASS] D-29a read miss: 1 memory read done before response | expected=0x1 actual=0x1
+  [PASS] D-29b read hit: no memory op | expected=0x0 actual=0x0
+  [PASS] D-29c write hit: 1 memory write done before response | expected=0x1 actual=0x1
+  [PASS] D-29d write hit: no memory read | expected=0x0 actual=0x0
+  [PASS] D-29e write miss: 1 read + 1 write before response | expected=0x2 actual=0x2
+  [PASS] D-29f monitor: no response before memory completion | expected=0x0 actual=0x0
+  [PASS] D-29g latency matches formula on every transaction | expected=0x0 actual=0x0
+[TEST-RESULT] D-29 PASS (7 checks)
+[TEST] D-30 : No stale response data
+       init: reset
+       stim: rdata cleared on write; refill data comes from memory not the old line; backdoor memory change visible on miss
+  [PASS] D-30a write response rdata = 0 (not the previous read data) | expected=0x0 actual=0x0
+  [PASS] D-30b miss returned the NEW memory value, not the evicted line's byte | expected=0xee actual=0xee
+  [PASS] D-30c ...which differs from the old cached byte | expected=0x1 actual=0x1
+  [PASS] D-30d subsequent hit returns the refilled value | expected=0xee actual=0xee
+  [PASS] D-30e monitor: cpu_rdata was 0 on every busy cycle (no stale data) | expected=0x0 actual=0x0
+[TEST-RESULT] D-30 PASS (5 checks)
+[TEST] E-01 : Address extremes 0x0000 and 0xFFFF
+       init: reset
+       stim: read and write all 4 bytes of the blocks at 0x0000 and 0xFFFC
+  [PASS] E-01a 0x0000+i read | expected=0x0 actual=0x0
+  [PASS] E-01a   returned byte equals memory image | expected=0x5a actual=0x5a
+  [PASS] E-01b 0xFFFC+i read | expected=0x0 actual=0x0
+  [PASS] E-01b   returned byte equals memory image | expected=0x5d actual=0x5d
+  [PASS] E-01a 0x0000+i read | expected=0x1 actual=0x1
+  [PASS] E-01a   returned byte equals memory image | expected=0x5b actual=0x5b
+  [PASS] E-01b 0xFFFC+i read | expected=0x1 actual=0x1
+  [PASS] E-01b   returned byte equals memory image | expected=0x5c actual=0x5c
+  [PASS] E-01a 0x0000+i read | expected=0x1 actual=0x1
+  [PASS] E-01a   returned byte equals memory image | expected=0x5c actual=0x5c
+  [PASS] E-01b 0xFFFC+i read | expected=0x1 actual=0x1
+  [PASS] E-01b   returned byte equals memory image | expected=0x5b actual=0x5b
+  [PASS] E-01a 0x0000+i read | expected=0x1 actual=0x1
+  [PASS] E-01a   returned byte equals memory image | expected=0x5d actual=0x5d
+  [PASS] E-01b 0xFFFC+i read | expected=0x1 actual=0x1
+  [PASS] E-01b   returned byte equals memory image | expected=0x5a actual=0x5a
+  [PASS] E-01c write 0xFFFF HIT | expected=0x1 actual=0x1
+  [PASS] E-01d write 0x0000 HIT | expected=0x1 actual=0x1
+  [PASS] E-01e memory[0xFFFF] = 0xC3 | expected=0xc3 actual=0xc3
+  [PASS] E-01f memory[0x0000] = 0x3C | expected=0x3c actual=0x3c
+  [PASS] E-01g write miss 0xFFFE | expected=0x0 actual=0x0
+  [PASS] E-01h line 15 tag = 0x3FF after allocate | expected=0x3ff actual=0x3ff
+  [PASS] E-01i line 15 block = memory block | expected=0xc35a5c5d actual=0xc35a5c5d
+[TEST-RESULT] E-01 PASS (23 checks)
+[TEST] E-02 : Each of the 10 tag bits independently, min/max tags (reads and writes)
+       init: reset
+       stim: address differing from a base in exactly one tag bit must MISS; then offset/index flips
+  [PASS] E-02a read: address differing in ONE tag bit is MISS | expected=0x0 actual=0x0
+  [PASS] E-02b   ...and returns the correct byte | expected=0x9a actual=0x9a
+  [PASS] E-02c   ...and stores that tag in the line | expected=0x1 actual=0x1
+  [PASS] E-02a read: address differing in ONE tag bit is MISS | expected=0x0 actual=0x0
+  [PASS] E-02b   ...and returns the correct byte | expected=0xda actual=0xda
+  [PASS] E-02c   ...and stores that tag in the line | expected=0x2 actual=0x2
+  [PASS] E-02a read: address differing in ONE tag bit is MISS | expected=0x0 actual=0x0
+  [PASS] E-02b   ...and returns the correct byte | expected=0x5b actual=0x5b
+  [PASS] E-02c   ...and stores that tag in the line | expected=0x4 actual=0x4
+  [PASS] E-02a read: address differing in ONE tag bit is MISS | expected=0x0 actual=0x0
+  [PASS] E-02b   ...and returns the correct byte | expected=0x5c actual=0x5c
+  [PASS] E-02c   ...and stores that tag in the line | expected=0x8 actual=0x8
+  [PASS] E-02a read: address differing in ONE tag bit is MISS | expected=0x0 actual=0x0
+  [PASS] E-02b   ...and returns the correct byte | expected=0xee actual=0xee
+  [PASS] E-02c   ...and stores that tag in the line | expected=0x10 actual=0x10
+  [PASS] E-02a read: address differing in ONE tag bit is MISS | expected=0x0 actual=0x0
+  [PASS] E-02b   ...and returns the correct byte | expected=0x62 actual=0x62
+  [PASS] E-02c   ...and stores that tag in the line | expected=0x20 actual=0x20
+  [PASS] E-02a read: address differing in ONE tag bit is MISS | expected=0x0 actual=0x0
+  [PASS] E-02b   ...and returns the correct byte | expected=0x6a actual=0x6a
+  [PASS] E-02c   ...and stores that tag in the line | expected=0x40 actual=0x40
+  [PASS] E-02a read: address differing in ONE tag bit is MISS | expected=0x0 actual=0x0
+  [PASS] E-02b   ...and returns the correct byte | expected=0x7a actual=0x7a
+  [PASS] E-02c   ...and stores that tag in the line | expected=0x80 actual=0x80
+  [PASS] E-02a read: address differing in ONE tag bit is MISS | expected=0x0 actual=0x0
+  [PASS] E-02b   ...and returns the correct byte | expected=0x9a actual=0x9a
+  [PASS] E-02c   ...and stores that tag in the line | expected=0x100 actual=0x100
+  [PASS] E-02a read: address differing in ONE tag bit is MISS | expected=0x0 actual=0x0
+  [PASS] E-02b   ...and returns the correct byte | expected=0xda actual=0xda
+  [PASS] E-02c   ...and stores that tag in the line | expected=0x200 actual=0x200
+  [PASS] E-02d write: address differing in ONE tag bit is MISS | expected=0x0 actual=0x0
+  [PASS] E-02e   ...write-through reached memory | expected=0xb0 actual=0xb0
+  [PASS] E-02d write: address differing in ONE tag bit is MISS | expected=0x0 actual=0x0
+  [PASS] E-02e   ...write-through reached memory | expected=0xb1 actual=0xb1
+  [PASS] E-02d write: address differing in ONE tag bit is MISS | expected=0x0 actual=0x0
+  [PASS] E-02e   ...write-through reached memory | expected=0xb2 actual=0xb2
+  [PASS] E-02d write: address differing in ONE tag bit is MISS | expected=0x0 actual=0x0
+  [PASS] E-02e   ...write-through reached memory | expected=0xb3 actual=0xb3
+  [PASS] E-02d write: address differing in ONE tag bit is MISS | expected=0x0 actual=0x0
+  [PASS] E-02e   ...write-through reached memory | expected=0xb4 actual=0xb4
+  [PASS] E-02d write: address differing in ONE tag bit is MISS | expected=0x0 actual=0x0
+  [PASS] E-02e   ...write-through reached memory | expected=0xb5 actual=0xb5
+  [PASS] E-02d write: address differing in ONE tag bit is MISS | expected=0x0 actual=0x0
+  [PASS] E-02e   ...write-through reached memory | expected=0xb6 actual=0xb6
+  [PASS] E-02d write: address differing in ONE tag bit is MISS | expected=0x0 actual=0x0
+  [PASS] E-02e   ...write-through reached memory | expected=0xb7 actual=0xb7
+  [PASS] E-02d write: address differing in ONE tag bit is MISS | expected=0x0 actual=0x0
+  [PASS] E-02e   ...write-through reached memory | expected=0xb8 actual=0xb8
+  [PASS] E-02d write: address differing in ONE tag bit is MISS | expected=0x0 actual=0x0
+  [PASS] E-02e   ...write-through reached memory | expected=0xb9 actual=0xb9
+  [PASS] E-02f tag-bit sweep: 3 indices x 4 base tags x 10 bits | 600 sub-checks, 0 mismatches
+  [PASS] E-02g offset bits do not affect hit detection | 2 sub-checks, 0 mismatches
+[TEST-RESULT] E-02 PASS (52 checks)
+[TEST] E-03 : Minimum and maximum cache indices
+       init: reset
+       stim: read byte 0 of every line with tag 0x000 and with tag 0x3FF
+  [PASS] E-03a all 16 indices work with minimum and maximum tag | 80 sub-checks, 0 mismatches
+[TEST-RESULT] E-03 PASS (1 checks)
+[TEST] E-04 : All four offsets at every address corner
+       init: reset
+       stim: first touch at each offset of 4 corner blocks
+  [PASS] E-04a corner-block offsets return the right byte lane | 32 sub-checks, 0 mismatches
+[TEST-RESULT] E-04 PASS (1 checks)
+[TEST] E-05 : Multiple addresses mapping to the same line (all 1024 tags at index 5)
+       init: reset
+       stim: read every tag 0..1023 at index 5, twice
+  [PASS] E-05a 1024 blocks sharing one line replace each other correctly | 4096 sub-checks, 0 mismatches
+  [PASS] E-05b 1024 refills | expected=0x686 actual=0x686
+[TEST-RESULT] E-05 PASS (2 checks)
+[TEST] E-06 : Invalid cache entries never hit (tag-0 aliasing after reset)
+       init: reset (tag arrays = 0, valid = 0)
+       stim: read a tag-0 address of every line; fill; reset; repeat
+  [PASS] E-06a 16 invalid lines all miss although stored tag == 0 | 16 sub-checks, 0 mismatches
+  [PASS] E-06b reset invalidates previously valid lines | 16 sub-checks, 0 mismatches
+[TEST-RESULT] E-06 PASS (2 checks)
+[TEST] E-07 : Repeated replacement (ping-pong)
+       init: reset
+       stim: alternate 0x0008 / 0x0048 (same index) 50 times each
+  [PASS] E-07a 100 consecutive conflict misses, all data correct | 200 sub-checks, 0 mismatches
+  [PASS] E-07b 100 refills | expected=0x71a actual=0x71a
+[TEST-RESULT] E-07 PASS (2 checks)
+[TEST] E-08 : Write replacement and write-allocate over a valid conflicting line
+       init: reset
+       stim: 256 tags written at index 5, then read back
+  [PASS] E-08a 256 write-allocates replace each other, memory always updated | 768 sub-checks, 0 mismatches
+  [PASS] E-08b all 256 written bytes read back correctly | 256 sub-checks, 0 mismatches
+[TEST-RESULT] E-08 PASS (2 checks)
+[TEST] E-09 : Write corners
+       init: reset
+       stim: write all 4 bytes of 0x0000 and 0xFFFC blocks on hit and miss
+  [PASS] E-09a corner writes reach memory | 8 sub-checks, 0 mismatches
+  [PASS] E-09b block 0xFFFC in cache = F3F2F1F0 | expected=0xf3f2f1f0 actual=0xf3f2f1f0
+  [PASS] E-09c block 0x0000 in cache = 0C0D0E0F | expected=0xc0d0e0f actual=0xc0d0e0f
+  [PASS] E-09d coherence | expected=0x0 actual=0x0
+[TEST-RESULT] E-09 PASS (4 checks)
+[TEST] E-10 : Large-address-space sweep (write then read)
+       init: reset
+       stim: stores then loads over the 64 KiB space (EXHAUSTIVE=1: every address)
+  [PASS] E-10a memory image equals scoreboard after write sweep | expected=0x0 actual=0x0
+  [PASS] E-10b cache lines coherent with memory | expected=0x0 actual=0x0
+  [PASS] E-10c read sweep returns the stored byte at every visited address | 65536 sub-checks, 0 mismatches
+  [PASS] E-10d monitor errors over the whole sweep | expected=0x0 actual=0x0
+[TEST-RESULT] E-10 PASS (4 checks)
+[TEST] E-11 : Illegal FSM state recovery
+       init: idle
+       stim: force state register to unused codes 10..15; check outputs quiet and recovery to IDLE
+  [PASS] E-11a all 6 unused state encodings are quiet and self-recover | 36 sub-checks, 0 mismatches
+  [PASS] E-11b controller works normally afterwards | expected=0x0 actual=0x0
+  [PASS] E-11b   returned byte equals memory image | expected=0x17 actual=0x17
+[TEST-RESULT] E-11 PASS (3 checks)
+[TEST] L-01 : Latency formulas: read hit 3, read miss 5+L, write hit 4+L, write miss 6+2L
+       init: reset
+       stim: one transaction of each type; measured accept->response cycles
+  [PASS] L-01a read hit latency = 3 | expected=0x3 actual=0x3
+  [PASS] L-01b read miss latency = 5+L | expected=0x9 actual=0x9
+  [PASS] L-01c write hit latency = 4+L | expected=0x8 actual=0x8
+  [PASS] L-01d write miss latency = 6+2L | expected=0xe actual=0xe
+  [PASS] L-01e monitor: every transaction matched the formula (measured L) | expected=0x0 actual=0x0
+  [PASS] L-01f monitor: memory latency equals configured | expected=0x0 actual=0x0
+LATENCY_CSV,4,3,9,8,14
+[TEST-RESULT] L-01 PASS (6 checks)
+COVERAGE,states_visited,10,10
+COVERAGE,legal_transitions_visited,17,17
+COVERAGE,illegal_transitions_visited,0,0
+COVERAGE,index_read,16,16
+COVERAGE,index_write,16,16
+COVERAGE,offset_read,4,4
+COVERAGE,offset_write,4,4
+COVERAGE,read_hit,50514,
+COVERAGE,read_miss,18392,
+COVERAGE,write_hit,49229,
+COVERAGE,write_miss,16721,
+COVERAGE,cold_misses_invalid_line,361,
+COVERAGE,conflict_misses_valid_line,34752,
+[TEST] C-01 : Functional coverage goals (state/transition/index/offset)
+       init: end of regression
+       stim: evaluate monitor coverage counters
+  [PASS] C-01a all 10 FSM states visited | expected=0xa actual=0xa
+  [PASS] C-01b all legal transitions visited (17; 16 when L=1) | expected=0x11 actual=0x11
+  [PASS] C-01c no illegal transition observed | expected=0x0 actual=0x0
+  [PASS] C-01d all 16 indices read | expected=0x10 actual=0x10
+  [PASS] C-01e all 16 indices written | expected=0x10 actual=0x10
+  [PASS] C-01f all 4 offsets read | expected=0x4 actual=0x4
+  [PASS] C-01g all 4 offsets written | expected=0x4 actual=0x4
+[TEST-RESULT] C-01 PASS (7 checks)
+MEMLAT_HIST,4,101035
+==== Statistics: requests=134859 (reads=68907 writes=65952) hits=99743 misses=35113 mem_reads=35103 mem_writes=65932 array_commits=65934 ====
+==== Protocol monitor: errors=0 latency_mismatches=0 memory_latency_mismatches=0 ====
+==== SUMMARY (MEM_LATENCY=4): TESTS=47 TESTS_FAILED=0 CHECKS_PASS=313 CHECKS_FAIL=0 ====
+RESULT: ALL TESTS PASSED
+testbench/cache_tb_directed.v:863: $finish called at 10805595000 (1ps)
+
+====================================================================================================
+SECTION 2: latency sweep summary (fixed and pseudo-random memory latency)
+====================================================================================================
+memory       exhaustive tests   tests_failed   checks_failed  result    measured cycles hit/rmiss/whit/wmiss
+L=0          0          47      0              0              PASS      3/6/5/8
+L=1          1          47      0              0              PASS      3/6/5/8
+L=2          1          47      0              0              PASS      3/7/6/10
+L=3          0          47      0              0              PASS      3/8/7/12
+L=4          1          47      0              0              PASS      3/9/8/14
+L=5          0          47      0              0              PASS      3/10/9/16
+L=6          0          47      0              0              PASS      3/11/10/18
+L=7          0          47      0              0              PASS      3/12/11/20
+L=8          0          47      0              0              PASS      3/13/12/22
+L=9          0          47      0              0              PASS      3/14/13/24
+L=10         0          47      0              0              PASS      3/15/14/26
+L=11         0          47      0              0              PASS      3/16/15/28
+L=12         0          47      0              0              PASS      3/17/16/30
+L=13         0          47      0              0              PASS      3/18/17/32
+L=14         0          47      0              0              PASS      3/19/18/34
+L=15         0          47      0              0              PASS      3/20/19/36
+L=16         0          47      0              0              PASS      3/21/20/38
+L=32         0          47      0              0              PASS      3/37/36/70
+L=64         0          47      0              0              PASS      3/69/68/134
+L=100        0          47      0              0              PASS      3/105/104/206
+L=255        0          47      0              0              PASS      3/260/259/516
+L=1000       0          47      0              0              PASS      3/1005/1004/2006
+
+memory         tests   tests_failed   checks_failed  result    measured memory latency histogram (cycles:count)
+random 1..2    47      0              0              PASS      1:3963 2:4065 
+random 1..3    47      0              0              PASS      1:2636 2:2681 3:2724 
+random 1..8    47      0              0              PASS      1:1020 2:1040 3:1008 4:1073 5:978 6:1005 7:1005 8:980 
+random 1..16   47      0              0              PASS      1:543 2:541 3:549 4:507 5:520 6:511 7:499 8:463 9:528 10:546 11:498 12:530 13:499 14:476 15:509 16:495 
+random 1..40   47      0              0              PASS      1:210 2:203 3:206 4:184 5:211 6:199 7:198 8:219 9:220 10:198 11:216 12:226 13:197 14:209 15:210 16:215 17:197 18:204 19:185 20:191 21:201 22:200 23:210 24:175 25:219 26:216 27:202 28:228 29:203 30:200 31:204 32:214 33:193 34:198 35:190 36:194 37:180 38:206 39:215 40:173 
+
+====================================================================================================
+SECTION 3: independent reference-model regression (tail)
+====================================================================================================
+# Reference-model regression: RTL (Icarus Verilog) vs independent Python model
+# generated by verification/randomized_tests.py
+# python: 3.14.5
+# iverilog: Icarus Verilog version 13.0 (stable) (v13_0)
+# profiles: uniform, hotset, conflict, sequential, write_heavy, mixed_reset, corners, tagbits
+# seeds: [1, 2, 3, 4, 5, 6]   fixed memory latencies: [1, 2, 3, 4, 8, 16]   variable-latency (max 8, pseudo-random per transaction): yes
+# transactions per random vector: 2500   total runs: 357   elapsed: 34.1s
+# compared per run: every transaction line (hit/miss, returned byte, latency [fixed-latency runs], memory reads/writes),
+#                   final 16-line cache state (valid, tag, data) and the full 64 KiB memory image
+TOTAL runs=357  passed=357  failed=0  (fixed-latency DUT transactions compared against the model: 714666)
+RESULT: ALL COMPARISONS PASSED
+
+====================================================================================================
+SECTION 4: mutation check
+====================================================================================================
+mutant                                               Phase1 TB Phase2 TB Phase2 TB (variable latency)
+M01 byte order reversed on read                      detected  detected  detected   [P2: fails=377 monitor=0]
+M02 valid bit ignored in hit                         detected  detected  detected   [P2: fails=130 monitor=0]
+M03 tag compare drops bit 9                          detected  detected  detected   [P2: fails=25 monitor=0]
+M04 byte write clobbers whole word                   detected  detected  detected   [P2: fails=29 monitor=0]
+M05 read miss does not wait for memory               detected  detected  detected   [P2: fails=514 monitor=7981]
+M06 refill tag not updated                           detected  detected  detected   [P2: fails=253 monitor=0]
+M07 write-through skipped                            detected  detected  detected   [P2: fails=209 monitor=4352]
+M08 block read address unaligned                     detected  detected  detected   [P2: fails=6 monitor=23204]
+M09 memory big-endian block assembly                 detected  detected  n/a (mem model)  [P2: fails=403 monitor=0]
+M10 stale rdata (loaded too early)                   detected  detected  detected   [P2: fails=304 monitor=52643]
+M11 write-allocate skips refill                      detected  detected  detected   [P2: fails=197 monitor=4232]
+M12 reset does not clear valid bits                  detected  detected  detected   [P2: fails=172 monitor=0]
+M13 memory re-accepts request in DONE                detected  detected  n/a (mem model)  [P2: fails=73 monitor=16087]
+M14 memory commits write twice                       SURVIVED  detected  n/a (mem model)  [P2: fails=56 monitor=2166]
+M15 request re-latched every cycle                   SURVIVED  detected  detected   [P2: fails=6 monitor=10]
+M16 memory FSM not reset                             SURVIVED  detected  n/a (mem model)  [P2: fails=109 monitor=1]
+M17 write hit does not update cache                  detected  detected  detected   [P2: fails=51 monitor=0]
+M18 wrong index field                                detected  detected  detected   [P2: fails=286 monitor=0]
+M19 memory writes block base not byte                detected  detected  n/a (mem model)  [P2: fails=185 monitor=0]
+M20 response one cycle early                         detected  detected  detected   [P2: fails=408 monitor=10076]
+M21 tag compare drops bit 0                          detected  detected  detected   [P2: fails=149 monitor=0]
+M22 tag compare drops bit 5                          detected  detected  detected   [P2: fails=25 monitor=0]
+M23 memory latency one cycle too long                detected  detected  n/a (mem model)  [P2: fails=5 monitor=0]
+M24 RESPONSE skips IDLE (request not latched)        SURVIVED  detected  detected   [P2: fails=17 monitor=208]
+M25 rdata not cleared on accept (stale)              SURVIVED  detected  detected   [P2: fails=12 monitor=33032]
+M26 refill writes block_reg of previous fill         detected  detected  detected   [P2: fails=404 monitor=0]
+M27 write miss data lost (no merge after refill)     detected  detected  detected   [P2: fails=35 monitor=0]
+M28 cache reset skips data/tag clear (valid cleared) SURVIVED  detected  detected   [P2: fails=17 monitor=0]
+
+Mutants not detected by the Phase 2 directed testbench: 0

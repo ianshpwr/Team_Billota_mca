@@ -1,0 +1,22 @@
+digraph block {
+  rankdir=LR; fontname="Helvetica"; nodesep=0.5; ranksep=0.9;
+  node [fontname="Helvetica", fontsize=11, shape=box, style="rounded,filled", fillcolor="#f7f7f7", color="#444444"];
+  edge [fontname="Helvetica", fontsize=9, color="#333333"];
+  label="Direct-mapped cache controller - system block diagram"; labelloc=t; fontsize=14;
+
+  cpu [label="CPU / Testbench\n(cache_tb.v)\nsimulation only", fillcolor="#e8eef7"];
+
+  subgraph cluster_top {
+    label="cache_top.v"; style="rounded,dashed"; color="#888888"; fontsize=11;
+    ctrl [label="cache_controller\n(FSM, tag compare,\nhit/miss, request latch)\nsynthesizable", fillcolor="#fdf1d8"];
+    cmem [label="cache_memory\n16 x {valid, tag[9:0], data[31:0]}\nbyte select / merge / refill\nsynthesizable", fillcolor="#e3f3e3"];
+    mem  [label="main_memory\n64 KiB behavioral model\nconfigurable latency\nsimulation model", fillcolor="#f3e3e3"];
+  }
+
+  cpu -> ctrl [label="cpu_req, cpu_we,\ncpu_addr[15:0], cpu_wdata[7:0]"];
+  ctrl -> cpu [label="cpu_ready, cpu_resp_valid,\ncpu_rdata[7:0]"];
+  ctrl -> cmem [label="index[3:0], offset[1:0]\nrefill_en/tag/data\nbyte_we/wdata"];
+  cmem -> ctrl [label="valid, tag[9:0],\nbyte[7:0]"];
+  ctrl -> mem  [label="mem_req, mem_we,\nmem_addr[15:0], mem_wdata[7:0]"];
+  mem  -> ctrl [label="mem_done,\nmem_rdata[31:0]"];
+}

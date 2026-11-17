@@ -1,0 +1,34 @@
+digraph fsm {
+  rankdir=TB; fontname="Helvetica"; nodesep=0.45; ranksep=0.55;
+  label="cache_controller FSM - 10 states, Moore outputs"; labelloc=t; fontsize=14;
+  node [fontname="Helvetica", fontsize=11, shape=ellipse, style=filled, fillcolor="#f7f7f7", color="#444444"];
+  edge [fontname="Helvetica", fontsize=9, color="#333333"];
+
+  IDLE [fillcolor="#e8eef7", peripheries=2, label="IDLE\ncpu_ready=1"];
+  COMPARE_TAG [label="COMPARE_TAG\nhit = valid & (tag==req_tag)"];
+  READ_HIT [fillcolor="#e3f3e3", label="READ_HIT\nrdata_reg <= cache byte"];
+  WRITE_HIT [fillcolor="#e3f3e3", label="WRITE_HIT\nbyte_we=1 (1 cycle)"];
+  READ_MISS [fillcolor="#f3e3e3", label="READ_MISS\nmem_req=1 (read)"];
+  WRITE_MISS [fillcolor="#f3e3e3", label="WRITE_MISS\nmem_req=1 (read)"];
+  MEMORY_READ_WAIT [fillcolor="#f3e3e3", label="MEMORY_READ_WAIT\nmem_req=1, hold until mem_done\nblock_reg <= mem_rdata"];
+  REFILL [fillcolor="#fdf1d8", label="REFILL\nrefill_en=1 (tag, valid, block)"];
+  MEMORY_WRITE_WAIT [fillcolor="#f3e3e3", label="MEMORY_WRITE_WAIT\nmem_req=1, mem_we=1\nhold until mem_done"];
+  RESPONSE [fillcolor="#e8eef7", label="RESPONSE\ncpu_resp_valid=1 (1 cycle)"];
+
+  IDLE -> COMPARE_TAG [label="cpu_req\n(latch addr/we/wdata)"];
+  COMPARE_TAG -> READ_HIT   [label="hit & !we"];
+  COMPARE_TAG -> WRITE_HIT  [label="hit & we"];
+  COMPARE_TAG -> READ_MISS  [label="!hit & !we"];
+  COMPARE_TAG -> WRITE_MISS [label="!hit & we"];
+  READ_MISS  -> MEMORY_READ_WAIT;
+  WRITE_MISS -> MEMORY_READ_WAIT;
+  MEMORY_READ_WAIT -> MEMORY_READ_WAIT [label="!mem_done"];
+  MEMORY_READ_WAIT -> REFILL [label="mem_done"];
+  REFILL -> READ_HIT  [label="!we  (replay as hit)"];
+  REFILL -> WRITE_HIT [label="we   (replay as hit)"];
+  READ_HIT -> RESPONSE;
+  WRITE_HIT -> MEMORY_WRITE_WAIT [label="write-through"];
+  MEMORY_WRITE_WAIT -> MEMORY_WRITE_WAIT [label="!mem_done"];
+  MEMORY_WRITE_WAIT -> RESPONSE [label="mem_done"];
+  RESPONSE -> IDLE;
+}

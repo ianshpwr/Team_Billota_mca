@@ -1,0 +1,29 @@
+# Build artefacts
+build/
+*.vvp
+a.out
+*.o
+# Editor / OS
+.DS_Store
+*.swp
+.vscode/
+.idea/
+# Python
+__pycache__/
+*.pyc
+.venv/
+# LaTeX intermediates (Phase 3)
+*.aux
+*.log
+*.out
+*.toc
+*.synctex.gz
+# Large/regenerable waveforms from sweeps or random runs (the curated waveform
+# evidence in results/ is committed deliberately)
+results/*_sweep*.vcd
+results/random_*.vcd
+
+# Waveform-viewer tooling (browser automation scratch and local Surfer copy)
+.playwright-mcp/
+.surfer/
+build/surfer_web/

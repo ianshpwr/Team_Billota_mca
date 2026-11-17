@@ -1,0 +1,12 @@
+M1 byte order reversed on read                                 DETECTED         fails=30 monitor_errors=0
+M2 valid bit ignored in hit                                    DETECTED         fails=15 monitor_errors=0
+M3 tag compare drops MSB                                       DETECTED         fails=4 monitor_errors=0
+M4 byte write clobbers whole word                              DETECTED         fails=5 monitor_errors=0
+M5 response without waiting for memory (read)                  DETECTED         fails=37 monitor_errors=29
+M6 refill tag not updated                                      DETECTED         fails=33 monitor_errors=0
+M7 write-through skipped (hit path jumps to RESPONSE)          DETECTED         fails=8 monitor_errors=2
+M8 memory block read unaligned (no addr mask)                  DETECTED         fails=1 monitor_errors=15
+M9 memory big-endian block assembly                            DETECTED         fails=33 monitor_errors=0
+M10 stale rdata (not cleared, read bypass from old reg)        DETECTED         fails=17 monitor_errors=0
+M11 write-allocate skips refill (write miss writes straight)   DETECTED         fails=9 monitor_errors=1
+M12 reset does not clear valid bits                            DETECTED         fails=6 monitor_errors=0

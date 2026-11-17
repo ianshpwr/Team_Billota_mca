@@ -1,0 +1,97 @@
+### tool versions
+Yosys 0.71+post (git sha1 5628c13240f670b97aaaca3d47940c4afb8ff572, Release, AppleClang clang++ 21.0.0.21000401)
+Verilator 5.054 2026-11-01 rev vUNKNOWN-built20261101
+Icarus Verilog version 13.0 (stable) (v13_0)
+
+### 1. Verilator lint (-Wall) per synthesizable module
+--- cache_controller
+no warnings
+--- cache_memory
+no warnings
+--- cache_top (+ cache_controller, cache_memory, main_memory model)
+%Warning-UNUSEDSIGNAL: rtl/cache_top.v:55:17: Signal is not used: 'cache_block'
+%Error: Exiting due to 1 warning(s)
+
+### 2. Yosys: elaboration, proc, check -assert (latches / multiple drivers / loops), per module
+--- cache_controller
+exit 0
+Found and reported 0 problems.
+--- cache_memory
+exit 0
+Found and reported 0 problems.
+
+### 3. Yosys top level (cache_top) with the simulation memory model blackboxed
+exit 0
+Found and reported 0 problems.
+=== cache_memory ===
+=== cache_controller ===
+=== cache_top ===
+=== design hierarchy ===
+
+### 4. FSM extraction (cache_controller): detected states and transitions
+Not marking cache_controller.state as FSM state register:
+    Register is connected to module port.
+    Users of register don't seem to benefit from recoding.
+
+
+### 5. Generic technology-independent synthesis: flip-flop / gate counts
+--- cache_controller
+=== cache_controller ===
+      143 cells
+        4   $_ANDNOT_
+       22   $_AND_
+        5   $_NAND_
+       12   $_NOR_
+        5   $_NOT_
+        5   $_ORNOT_
+       11   $_OR_
+       69   $_SDFFE_PP0P_
+       10   $_XOR_
+--- cache_memory
+=== cache_memory ===
+     1963 cells
+       51   $_ANDNOT_
+      253   $_AND_
+      531   $_MUX_
+      154   $_NAND_
+       67   $_NOR_
+        4   $_NOT_
+       89   $_ORNOT_
+      122   $_OR_
+      672   $_SDFFCE_PN0P_
+       16   $_SDFFE_PP0P_
+        3   $_XNOR_
+        1   $_XOR_
+
+### 6. iCE40 LUT4 mapping estimate (technology mapping only; no place-and-route, no timing)
+--- cache_controller
+  with \SB_CARRY    (#0)    0
+  with \SB_CARRY    (#1)    0
+  with \SB_CARRY    (#0)    0
+  with \SB_CARRY    (#1)    0
+       69   SB_DFFESR
+       42   SB_LUT4
+        - cells
+       69   SB_DFFESR
+       42   SB_LUT4
+      111 cells
+       69   SB_DFFESR
+       42   SB_LUT4
+--- cache_memory
+  with \SB_CARRY    (#0)    0
+  with \SB_CARRY    (#1)    0
+  with \SB_CARRY    (#0)    0
+  with \SB_CARRY    (#1)    0
+      688   SB_DFFESR
+      736   SB_LUT4
+        - cells
+      688   SB_DFFESR
+      736   SB_LUT4
+     1424 cells
+      688   SB_DFFESR
+      736   SB_LUT4
+
+### 7. Yosys warnings (all runs, unfiltered, de-duplicated)
+  37 ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+   2 Lexer warning: The SystemVerilog keyword `bit' (at /opt/homebrew/Cellar/yosys/0.71/bin/../share/yosys/abc9_map.v:35) is not recognized unless read_verilog is called with -sv!
+   2 ABC: Warning: The network is combinational.

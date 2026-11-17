@@ -1,0 +1,128 @@
+VCD info: dumpfile results/phase1_waveform.vcd opened for output.
+==== Phase 1 testbench start: MEM_LATENCY=4 ====
+[PASS] P1-01a cpu_ready high after reset | expected=0x1 actual=0x1
+[PASS] P1-01b cpu_resp_valid low after reset | expected=0x0 actual=0x0
+[PASS] P1-01c mem_req low after reset | expected=0x0 actual=0x0
+[PASS] P1-01d FSM in IDLE after reset | expected=0x0 actual=0x0
+[PASS] P1-01e all 16 valid bits cleared | expected=0x0 actual=0x0
+[PASS] P1-02a line 1 invalid before first access | expected=0x0 actual=0x0
+[PASS] P1-02b cold access classified as MISS | expected=0x0 actual=0x0
+[PASS] P1-02c returned byte correct (0x0004) | expected=0x5e actual=0x5e
+[PASS] P1-02d one memory block read issued | expected=0x1 actual=0x1
+[PASS] P1-02e no memory write issued | expected=0x0 actual=0x0
+[PASS] P1-02f line 1 valid after refill | expected=0x1 actual=0x1
+[PASS] P1-02g line 1 tag = 0x000 | expected=0x0 actual=0x0
+[PASS] P1-02h line 1 holds full block 0x0004..07 | expected=0x61605f5e actual=0x61605f5e
+[PASS] P1-03a repeat access classified as HIT | expected=0x1 actual=0x1
+[PASS] P1-03b returned byte correct | expected=0x5e actual=0x5e
+[PASS] P1-03c no memory read on hit | expected=0x1 actual=0x1
+[PASS] P1-04a same-block offset is HIT | expected=0x1 actual=0x1
+[PASS] P1-04b same-block offset byte correct | expected=0x5f actual=0x5f
+[PASS] P1-04c no memory read | expected=0x1 actual=0x1
+[PASS] P1-04a same-block offset is HIT | expected=0x1 actual=0x1
+[PASS] P1-04b same-block offset byte correct | expected=0x60 actual=0x60
+[PASS] P1-04c no memory read | expected=0x1 actual=0x1
+[PASS] P1-04a same-block offset is HIT | expected=0x1 actual=0x1
+[PASS] P1-04b same-block offset byte correct | expected=0x61 actual=0x61
+[PASS] P1-04c no memory read | expected=0x1 actual=0x1
+[PASS] P1-05a second block cold MISS | expected=0x0 actual=0x0
+[PASS] P1-05b second block byte correct | expected=0x62 actual=0x62
+[PASS] P1-05c line 2 tag = 0x000 | expected=0x0 actual=0x0
+[PASS] P1-05d second block offset 2 is HIT | expected=0x1 actual=0x1
+[PASS] P1-05e second block offset 2 correct | expected=0x64 actual=0x64
+[PASS] P1-06a conflicting address is MISS | expected=0x0 actual=0x0
+[PASS] P1-06b conflicting address byte correct | expected=0x9e actual=0x9e
+[PASS] P1-06c one block refill | expected=0x3 actual=0x3
+[PASS] P1-06d line 1 tag replaced by 0x001 | expected=0x1 actual=0x1
+[PASS] P1-06e line 1 holds new block 0x0044..47 | expected=0xa1a09f9e actual=0xa1a09f9e
+[PASS] P1-06f new block offset 1 is HIT | expected=0x1 actual=0x1
+[PASS] P1-06g new block offset 1 correct | expected=0x9f actual=0x9f
+[PASS] P1-07a evicted block re-access is MISS | expected=0x0 actual=0x0
+[PASS] P1-07b re-fetched byte correct | expected=0x5e actual=0x5e
+[PASS] P1-07c line 1 tag back to 0x000 | expected=0x0 actual=0x0
+[PASS] P1-08a line 2 survived the line-1 conflict | expected=0x1 actual=0x1
+[PASS] P1-08b line 2 byte correct | expected=0x63 actual=0x63
+[PASS] P1-08c no memory read | expected=0x4 actual=0x4
+[PASS] P1-09a 0x0000 MISS | expected=0x0 actual=0x0
+[PASS] P1-09b 0x0000 byte correct | expected=0x5a actual=0x5a
+[PASS] P1-09c 0xFFFF MISS | expected=0x0 actual=0x0
+[PASS] P1-09d 0xFFFF byte correct | expected=0x5a actual=0x5a
+[PASS] P1-09e line 15 tag = 0x3FF | expected=0x3ff actual=0x3ff
+[PASS] P1-09f line 15 holds block 0xFFFC..FF | expected=0x5a5b5c5d actual=0x5a5b5c5d
+[PASS] P1-09g 0xFFFC (offset 0) HIT | expected=0x1 actual=0x1
+[PASS] P1-09h 0xFFFC byte correct (byte order) | expected=0x5d actual=0x5d
+[PASS] P1-10a write to uncached block is MISS | expected=0x0 actual=0x0
+[PASS] P1-10b write-allocate: one block fetch | expected=0x7 actual=0x7
+[PASS] P1-10c write-through: one memory write | expected=0x1 actual=0x1
+[PASS] P1-10d memory byte 0x0102 = 0xA5 | expected=0xa5 actual=0xa5
+[PASS] P1-10e memory byte 0x0100 untouched | expected=0x5b actual=0x5b
+[PASS] P1-10f memory byte 0x0101 untouched | expected=0x5a actual=0x5a
+[PASS] P1-10g memory byte 0x0103 untouched | expected=0x5c actual=0x5c
+[PASS] P1-10h line 0 tag = 0x004 (allocated) | expected=0x4 actual=0x4
+[PASS] P1-10i line 0 block = merged | expected=0x5ca55a5b actual=0x5ca55a5b
+[PASS] P1-10j read-after-write byte is HIT | expected=0x1 actual=0x1
+[PASS] P1-10k read-after-write byte correct | expected=0x5b actual=0x5b
+[PASS] P1-10j read-after-write byte is HIT | expected=0x1 actual=0x1
+[PASS] P1-10k read-after-write byte correct | expected=0x5a actual=0x5a
+[PASS] P1-10j read-after-write byte is HIT | expected=0x1 actual=0x1
+[PASS] P1-10k read-after-write byte correct | expected=0xa5 actual=0xa5
+[PASS] P1-10j read-after-write byte is HIT | expected=0x1 actual=0x1
+[PASS] P1-10k read-after-write byte correct | expected=0x5c actual=0x5c
+[PASS] P1-11a write to cached block is HIT | expected=0x1 actual=0x1
+[PASS] P1-11b no block fetch on write hit | expected=0x7 actual=0x7
+[PASS] P1-11c exactly one memory write | expected=0x2 actual=0x2
+[PASS] P1-11d memory byte 0x0101 = 0x3C | expected=0x3c actual=0x3c
+[PASS] P1-11e cache line 0 block updated, others kept | expected=0x5ca53c5b actual=0x5ca53c5b
+[PASS] P1-11f read-after-write returns 0x3C | expected=0x3c actual=0x3c
+[PASS] P1-12a valid bits cleared by reset | expected=0x0 actual=0x0
+[PASS] P1-12b FSM back in IDLE | expected=0x0 actual=0x0
+[PASS] P1-12c memory content survives reset | expected=0x3c actual=0x3c
+[PASS] P1-12d post-reset access is MISS | expected=0x0 actual=0x0
+[PASS] P1-12e post-reset data = written value | expected=0x3c actual=0x3c
+[PASS] P1-13a address differing in one tag bit is MISS | expected=0x0 actual=0x0
+[PASS] P1-13b its byte is correct | expected=0xba actual=0xba
+[PASS] P1-13c its refill tag equals address tag | expected=0x1 actual=0x1
+[PASS] P1-13d returning to base address is MISS (evicted) | expected=0x0 actual=0x0
+[PASS] P1-13a address differing in one tag bit is MISS | expected=0x0 actual=0x0
+[PASS] P1-13b its byte is correct | expected=0xfa actual=0xfa
+[PASS] P1-13c its refill tag equals address tag | expected=0x2 actual=0x2
+[PASS] P1-13d returning to base address is MISS (evicted) | expected=0x0 actual=0x0
+[PASS] P1-13a address differing in one tag bit is MISS | expected=0x0 actual=0x0
+[PASS] P1-13b its byte is correct | expected=0x7b actual=0x7b
+[PASS] P1-13c its refill tag equals address tag | expected=0x4 actual=0x4
+[PASS] P1-13d returning to base address is MISS (evicted) | expected=0x0 actual=0x0
+[PASS] P1-13a address differing in one tag bit is MISS | expected=0x0 actual=0x0
+[PASS] P1-13b its byte is correct | expected=0x7c actual=0x7c
+[PASS] P1-13c its refill tag equals address tag | expected=0x8 actual=0x8
+[PASS] P1-13d returning to base address is MISS (evicted) | expected=0x0 actual=0x0
+[PASS] P1-13a address differing in one tag bit is MISS | expected=0x0 actual=0x0
+[PASS] P1-13b its byte is correct | expected=0x7e actual=0x7e
+[PASS] P1-13c its refill tag equals address tag | expected=0x10 actual=0x10
+[PASS] P1-13d returning to base address is MISS (evicted) | expected=0x0 actual=0x0
+[PASS] P1-13a address differing in one tag bit is MISS | expected=0x0 actual=0x0
+[PASS] P1-13b its byte is correct | expected=0x82 actual=0x82
+[PASS] P1-13c its refill tag equals address tag | expected=0x20 actual=0x20
+[PASS] P1-13d returning to base address is MISS (evicted) | expected=0x0 actual=0x0
+[PASS] P1-13a address differing in one tag bit is MISS | expected=0x0 actual=0x0
+[PASS] P1-13b its byte is correct | expected=0x8a actual=0x8a
+[PASS] P1-13c its refill tag equals address tag | expected=0x40 actual=0x40
+[PASS] P1-13d returning to base address is MISS (evicted) | expected=0x0 actual=0x0
+[PASS] P1-13a address differing in one tag bit is MISS | expected=0x0 actual=0x0
+[PASS] P1-13b its byte is correct | expected=0x5a actual=0x5a
+[PASS] P1-13c its refill tag equals address tag | expected=0x80 actual=0x80
+[PASS] P1-13d returning to base address is MISS (evicted) | expected=0x0 actual=0x0
+[PASS] P1-13a address differing in one tag bit is MISS | expected=0x0 actual=0x0
+[PASS] P1-13b its byte is correct | expected=0xba actual=0xba
+[PASS] P1-13c its refill tag equals address tag | expected=0x100 actual=0x100
+[PASS] P1-13d returning to base address is MISS (evicted) | expected=0x0 actual=0x0
+[PASS] P1-13a address differing in one tag bit is MISS | expected=0x0 actual=0x0
+[PASS] P1-13b its byte is correct | expected=0xfa actual=0xfa
+[PASS] P1-13c its refill tag equals address tag | expected=0x200 actual=0x200
+[PASS] P1-13d returning to base address is MISS (evicted) | expected=0x0 actual=0x0
+[PASS] P1-14a monitor: protocol errors | expected=0x0 actual=0x0
+[PASS] P1-14b monitor: latency matches documented formula | expected=0x0 actual=0x0
+[PASS] P1-14c hit+miss count equals request count | expected=0x2b actual=0x2b
+==== Statistics: requests=43 hits=14 misses=29 mem_reads=29 mem_writes=2 ====
+==== SUMMARY (MEM_LATENCY=4): PASS=122 FAIL=0 ====
+RESULT: ALL TESTS PASSED
+testbench/cache_tb.v:420: $finish called at 3705000 (1ps)

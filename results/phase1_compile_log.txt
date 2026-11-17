@@ -1,0 +1,4 @@
+# iverilog: Icarus Verilog version 13.0 (stable) (v13_0)
+# vvp:      Icarus Verilog runtime version 13.0 (stable) (v13_0)
+# command:  iverilog -g2001 -Wall -s cache_tb -o build/cache_tb.vvp testbench/cache_tb.v rtl/main_memory.v rtl/cache_memory.v rtl/cache_controller.v rtl/cache_top.v
+# iverilog exit code: 0
