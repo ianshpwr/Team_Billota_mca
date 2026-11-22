@@ -136,7 +136,7 @@ See [docs/individual_contributions.md](docs/individual_contributions.md) (includ
 ## Links
 
 * Repository: [TODO: URL]
-* Prototype video: [TODO: link - **not yet recorded**] ([script](video/demo_script.md), [checklist](video/recording_checklist.md))
+* Prototype video: [https://drive.google.com/file/d/1Aw8sDrIyfUEE_O5VrXoZzro9hrviibou/view?usp=sharing]
 
 ## License
 
