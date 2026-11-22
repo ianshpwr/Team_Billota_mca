@@ -3,10 +3,6 @@
 Design and implementation of a direct-mapped cache controller with a write-through / write-allocate policy, a behavioural
 main-memory model and a thoroughly self-checking verification environment, in Verilog-2001, simulated with Icarus Verilog.
 
-> **Status:** Phases 1-3 of the plan are complete (RTL, verification, report). Items that need the team are marked `[TODO]`:
-> member names / enrollment numbers / contributions, repository URL, LICENSE holder, and the **demonstration video, which has not
-> been recorded**. Nothing here has been run on an FPGA; there are no timing or area measurements, only simulation results and a
-> synthesis-tool mapping estimate. See [PHASE_STATUS.md](PHASE_STATUS.md) and the [final audit](docs/final_audit.md).
 
 ## Specification
 
@@ -135,7 +131,7 @@ See [docs/individual_contributions.md](docs/individual_contributions.md) (includ
 
 ## Links
 
-* Repository: [TODO: URL]
+* Repository: [https://github.com/ianshpwr/Team_Billota_mca.git]
 * Prototype video: [https://drive.google.com/file/d/1Aw8sDrIyfUEE_O5VrXoZzro9hrviibou/view?usp=sharing]
 
 ## License
