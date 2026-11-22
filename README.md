@@ -120,11 +120,11 @@ write-back, FPGA place-and-route, formal verification. Full lists: [PHASE_STATUS
 
 | Member | Name | Enrollment |
 |---|---|---|
-| 1 | [Lokendra Singh] | [2401010254] | 
-| 2 | [Ansh] | [2401010077] |
-| 3 | [Gauri Mehrotra] | [2401010170] |
-| 4 | [Agnik Misra] | [2401010044] |
-| 5 | [Kartikey Gupta] | [2401010214] | 
+| 1 | Lokendra Singh | 2401010254 | 
+| 2 | Ansh | 2401010077 |
+| 3 | Gauri Mehrotra | 2401010170 |
+| 4 | Agnik Misra | 2401010044 |
+| 5 | Kartikey Gupta | 2401010214 | 
 
 
 ## Links
