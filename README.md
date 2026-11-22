@@ -118,16 +118,14 @@ write-back, FPGA place-and-route, formal verification. Full lists: [PHASE_STATUS
 
 ## Team and contributions
 
-| Member | Name | Enrollment | Contribution |
-|---|---|---|---|
-| 1 | [TODO: name] | [TODO] | [TODO: actual contribution] |
-| 2 | [TODO: name] | [TODO] | [TODO: actual contribution] |
-| 3 | [TODO: name] | [TODO] | [TODO: actual contribution] |
-| 4 | [TODO: name] | [TODO] | [TODO: actual contribution] |
-| 5 | [TODO: name] | [TODO] | [TODO: actual contribution] |
+| Member | Name | Enrollment |
+|---|---|---|
+| 1 | [Lokendra Singh] | [2401010254] | 
+| 2 | [Ansh] | [2401010077] |
+| 3 | [Gauri Mehrotra] | [2401010170] |
+| 4 | [Agnik Misra] | [2401010044] |
+| 5 | [Kartikey Gupta] | [2401010214] | 
 
-See [docs/individual_contributions.md](docs/individual_contributions.md) (includes the AI-assistance disclosure that the team must complete) and
-[docs/git_workflow.md](docs/git_workflow.md).
 
 ## Links
 
